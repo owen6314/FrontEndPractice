@@ -1,0 +1,76 @@
+@import "total.css";
+body{
+	min-width: 640px;
+	min-height: 480px;
+	backgrouond:#DADBDC;
+	font-family: "Microsoft YaHei", "SimHei", "Apple LiGothic Medium";
+}
+div{
+	display: block;
+}
+#center{
+	position:relative;
+	background: #ffffff;
+	margin:auto;
+	width:640px;
+	height: 480px;
+}
+.greet{
+	position: absolute;
+	top:64px;
+	left:48px;
+	width: 512px;
+	height: 224px;
+	background: #E64E2E;
+	z-index: 1;
+}
+.red_triangle{
+	position: absolute;
+	top: 288px;
+	left: 80px;
+	width:0px;
+	height: 0px;
+	background: #ffffff;
+	border-top: 48px solid #E64E2E;
+	border-right:48px solid transparent;
+	border-bottom: 0px solid black;
+	border-left: 0px solid black;
+}
+.info{
+	position: absolute;
+	background-color: #F2F2F2;
+	top:96px;
+	left:176px;
+	padding:32px;
+	width:352px;
+	height: 208px;
+	z-index: 2;
+}
+.bar{
+	position: absolute;
+	top:304px;
+	right:32px;
+	width:208px;
+	height:80px;
+	background: #FFFFFF;
+	z-index:3;
+	box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+.grey_triangle{
+	position: absolute;
+	top:288px;
+	left:592px;
+	width:0px;
+	height:0px;
+	border-top:16px solid transparent;
+	border-right:0px;
+	border-bottom: 0px;
+	border-left:16px solid #CCCCCC;
+}
+.disconnect{
+	margin:16px;
+	width:174px;
+	height:46px;
+	border:#B2AABE solid 1px;
+	background: #C0BDCC
+}
