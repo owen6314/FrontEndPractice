@@ -1,13 +1,21 @@
-@import "total.css";
+
+* 
+{
+	margin:0;
+	padding:0;
+	border:0;
+}
 body{
-	min-width: 640px;
+	min-width: 768px;
 	min-height: 480px;
 	background:#E6E6E6 url(../image/popup_bg.png) no-repeat top right;
 	font-family: "Microsoft YaHei", "SimHei", "Apple LiGothic Medium";
 }
+
 div{
 	display: block;
 }
+
 button{
 	/*
 	text-rendering: auto;
@@ -16,8 +24,10 @@ button{
 	text-transform: none;
 	text-shadow: none;
 	display:inline-block;*/
-	font:18px "Helvetica";
 	text-align: center;
+}
+.eng{
+	font-size:13px;
 }
 #center{
 	position:relative;
@@ -26,6 +36,7 @@ button{
 	width:640px;
 	height: 480px;
 }
+
 .greet{
 	position: absolute;
 	top:64px;
@@ -34,6 +45,27 @@ button{
 	height: 224px;
 	background: #E64E2E;
 	z-index: 1;
+}
+.smile_face{
+	position: absolute;
+	top:20px;
+	left:25px;
+	font-size: 88px;
+	color:white;
+}
+.welcome_ch{
+	position: absolute;
+	top:130px;
+	left:25px;
+	font-size:30px;
+	color:white;
+}
+.welcome_eng{
+	position: absolute;
+	top:180px;
+	left:25px;
+	font-size:20px;
+	color:white;
 }
 .red_triangle{
 	position: absolute;
@@ -47,39 +79,6 @@ button{
 	border-bottom: 0px solid black;
 	border-left: 0px solid black;
 }
-.info{
-	position: absolute;
-	background-color: #F2F2F2;
-	top:96px;
-	left:176px;
-	padding:32px;
-	width:352px;
-	height: 208px;
-	z-index: 2;
-}
-.info_content{
-	float: left;
-    margin-top: -8px;
-}
-.info_content_label{
-	clear: left;
-    float: left;
-    width: 56px;
-    height: 32px;
-    margin-top: 22px;
-    text-align: right;
-    font-size: 13px;
-}
-.bar{
-	position: absolute;
-	top:304px;
-	right:32px;
-	width:208px;
-	height:80px;
-	background: #FFFFFF;
-	z-index:3;
-	box-shadow: 0 0 8px rgba(0,0,0,0.1);
-}
 .grey_triangle{
 	position: absolute;
 	top:288px;
@@ -91,12 +90,15 @@ button{
 	border-bottom: 0px;
 	border-left:16px solid #CCCCCC;
 }
-.disconnect_button{
-	margin:16px;
-	width:174px;
-	height:46px;
-	border:#B2AABE solid 1px;
-	background: #C0BDCC
+.info{
+	position: absolute;
+	background-color: #F2F2F2;
+	top:96px;
+	left:176px;
+	padding:32px;
+	width:352px;
+	height: 208px;
+	z-index: 2;
 }
 .user_name{
 	float: left;
@@ -109,4 +111,129 @@ button{
     -webkit-margin-after: 0.83em;
     -webkit-margin-start: 0px;
     -webkit-margin-end: 0px;*/
+}
+.info_content{
+	position: absolute;
+	top:70px;
+	left:28px;
+	float: left;
+    margin-top: -8px;
+}
+.info_content_label{
+	clear: left;
+    float: left;
+    width: 56px;
+    height: 32px;
+    margin-top: 22px;
+    text-align: right;
+    font-size: 13px;
+}
+
+.clock{
+	position: absolute;
+	top: 30px;
+	left:80px;
+	font-size:28px;
+	color:#ec6677;
+	font-family: Helvetica, Arial,sans-serif;
+	font-weight: lighter;
+}
+/* the picture of usage*/
+.info_content_usage{
+	position: relative;
+	float:left;
+	margin:24px 0 0 16px;
+	padding:0;
+	width: 280px;
+	height:32px;
+	background: url(../image/usage_bg.gif) repeat-y;
+}
+.calibration{
+	position:absolute;
+	top:-16px;
+	right:-22px;
+	font-family: Verdana,Geneva,sans-serif;
+	font-size: 13px;
+	color:#969696;
+	list-style: none;
+	/*
+	-webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;*/
+}
+.calibration li{
+	float:left;
+	margin-right:38px;
+}
+.used_value{
+	width:27px;
+	float:left;
+	height:32px;
+	max-width: 280px;
+	background: #fbb03b;
+}
+.used_value_number{
+	position: absolute;
+	top: 2px;
+	left: 4px;
+	float:none;
+	margin:0;
+	padding:0;
+	height: 28px;
+	font-family:Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: lighter;
+	color:#5c5c5c;
+	margin-left:8px;
+}
+.first_stripe{
+	position:absolute;
+	top:0;
+	right:4px;
+	width:4px;
+	height:100%;
+	background:#f2f2f2;
+}
+.second_stripe{
+	position: absolute;
+	top:0;
+	right:12px;
+	width:4px;
+	height:100%;
+	background: #F2F2F2;
+}
+
+/*disconnect_button is in the bar*/
+.bar{
+	position: absolute;
+	top:304px;
+	right:32px;
+	width:208px;
+	height:80px;
+	background: #FFFFFF;
+	z-index:3;
+	box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.disconnect_button{
+	margin:16px;
+	width:174px;
+	height:46px;
+	border:#B2AABE solid 1px;
+	background: #e6e6e6;
+	font:18px Arial;
+}
+/*icons*/
+.icons{
+	list-style: none;
+	position: absolute;
+	top: 420px;
+	right:220px;
+}
+.icons li{
+	margin-right:10px;
+	float:left;
+	
 }
