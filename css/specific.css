@@ -235,5 +235,24 @@ button{
 .icons li{
 	margin-right:10px;
 	float:left;
-	
+}
+.icons a{
+	text-decoration: none;
+	color: #ad3b23;
+	padding:16px 0 0 26px;
+	height:16px;
+}
+#link_info{
+	background: url(../image/popup_info.gif) no-repeat 2px 2px;
+}
+#link_lib{
+	background: url(../image/popup_lib.gif) no-repeat 2px 2px;
+}
+#link_learn
+{
+	background: url(../image/popup_learn.gif) no-repeat 2px 2px;
+}
+#link_mail{
+	background: url(../image/popup_mail.gif) no-repeat 2px 2px;
+
 }
