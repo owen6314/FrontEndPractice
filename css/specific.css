@@ -8,6 +8,18 @@ body{
 div{
 	display: block;
 }
+button{
+	/*
+	text-rendering: auto;
+	letter-spacing: normal;
+	word-spacing: normal;
+	text-transform: none;
+	text-shadow: none;
+	display:inline-block;*/
+	font:18px system-ui;
+
+	text-align: center;
+}
 #center{
 	position:relative;
 	background: #ffffff;
@@ -67,10 +79,11 @@ div{
 	border-bottom: 0px;
 	border-left:16px solid #CCCCCC;
 }
-.disconnect{
+.disconnect_button{
 	margin:16px;
 	width:174px;
 	height:46px;
 	border:#B2AABE solid 1px;
 	background: #C0BDCC
 }
+#info .username
