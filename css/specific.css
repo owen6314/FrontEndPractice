@@ -2,7 +2,7 @@
 body{
 	min-width: 640px;
 	min-height: 480px;
-	backgrouond:#DADBDC;
+	background:#E6E6E6 url(../image/popup_bg.png) no-repeat top right;
 	font-family: "Microsoft YaHei", "SimHei", "Apple LiGothic Medium";
 }
 div{
@@ -16,13 +16,12 @@ button{
 	text-transform: none;
 	text-shadow: none;
 	display:inline-block;*/
-	font:18px system-ui;
-
+	font:18px "Helvetica";
 	text-align: center;
 }
 #center{
 	position:relative;
-	background: #ffffff;
+	background: transparent;
 	margin:auto;
 	width:640px;
 	height: 480px;
@@ -42,7 +41,7 @@ button{
 	left: 80px;
 	width:0px;
 	height: 0px;
-	background: #ffffff;
+	/*background: #ffffff;*/
 	border-top: 48px solid #E64E2E;
 	border-right:48px solid transparent;
 	border-bottom: 0px solid black;
@@ -57,6 +56,19 @@ button{
 	width:352px;
 	height: 208px;
 	z-index: 2;
+}
+.info_content{
+	float: left;
+    margin-top: -8px;
+}
+.info_content_label{
+	clear: left;
+    float: left;
+    width: 56px;
+    height: 32px;
+    margin-top: 22px;
+    text-align: right;
+    font-size: 13px;
 }
 .bar{
 	position: absolute;
@@ -86,4 +98,15 @@ button{
 	border:#B2AABE solid 1px;
 	background: #C0BDCC
 }
-#info .username
+.user_name{
+	float: left;
+    color: #E64E2E;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 34px;
+    font-weight: lighter;
+	/*
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;*/
+}
