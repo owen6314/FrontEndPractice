@@ -23,12 +23,12 @@ div
 button
 {
     /*
-	text-rendering: auto;
-	letter-spacing: normal;
-	word-spacing: normal;
-	text-transform: none;
-	text-shadow: none;
-	display:inline-block;*/
+    text-rendering: auto;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-shadow: none;
+    display:inline-block;*/
     text-align: center;
 }
 .eng
@@ -58,7 +58,7 @@ button
 
     background: #e64e2e;
 }
-.smile_face
+.smile_face_colon
 {
     font-size: 88px;
 
@@ -68,25 +68,43 @@ button
 
     color: white;
 }
+
+.smile_face_p
+{
+    font-size: 88px;
+
+    position: absolute;
+    top: 20px;
+    left: 50px;
+
+    color: white;
+}
 .welcome_ch
 {
+    font-family: 'Courier New';
     font-size: 30px;
+    font-weight: lighter;
 
     position: absolute;
     top: 130px;
     left: 25px;
 
-    color: white;
+    color: #f2f2f2;
+
 }
 .welcome_eng
 {
-    font-size: 20px;
+    font-family: 'Courier New';
+    font-size: 22px;
+    font-weight: lighter;
 
     position: absolute;
     top: 180px;
     left: 25px;
 
-    color: white;
+    color: #f2f2f2;
+
+
 }
 .red_triangle
 {
@@ -208,7 +226,7 @@ button
 
     color: #969696;
     /*
-	-webkit-margin-before: 1em;
+    -webkit-margin-before: 1em;
     -webkit-margin-after: 1em;
     -webkit-margin-start: 0px;
     -webkit-margin-end: 0px;
