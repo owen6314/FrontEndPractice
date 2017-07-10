@@ -58,51 +58,61 @@ button
 
     background: #e64e2e;
 }
-.smile_face_colon
+.smile_face_eye1
 {
-    font-size: 88px;
-
+    width: 0;
+    height:0;
     position: absolute;
-    top: 20px;
-    left: 25px;
-
+    top: 45px;
+    left: 30px;
+    border: 5px solid white;
     color: white;
+}
+.smile_face_eye2
+{
+    width: 0;
+    height:0;
+    position: absolute;
+    top:80px;
+    left:30px;
+    color:white;
+    border: 5px solid white;
 }
 
 .smile_face_p
 {
-    font-size: 88px;
-
+    font-weight: lighter;
+    font-size: 90px;
     position: absolute;
-    top: 20px;
+    top: 15px;
     left: 50px;
 
     color: white;
 }
 .welcome_ch
 {
-    font-family: 'Courier New';
-    font-size: 30px;
+    font-family: 'Arial Narrow';
+    font-size: 32px;
     font-weight: lighter;
 
     position: absolute;
-    top: 130px;
+    top: 125px;
     left: 25px;
 
-    color: #f2f2f2;
+    color: rgba(231,227,228,0.8);
 
 }
 .welcome_eng
 {
-    font-family: 'Courier New';
+    font-family: 'Times New Roman';
     font-size: 22px;
     font-weight: lighter;
 
     position: absolute;
-    top: 180px;
+    top: 170px;
     left: 25px;
 
-    color: #f2f2f2;
+    color: rgba(231,227,228,0.6);
 
 
 }
@@ -134,6 +144,16 @@ button
     border-right: 0;
     border-bottom: 0;
     border-left: 16px solid #ccc;
+}
+.grey_oval{
+    position:absolute;
+    top:360px;
+    left:100px;
+    width:400px;
+    height:20px;
+    background:rgba(213,213,213,0.2);
+    z-index:-20;
+    border-radius:100px/50px;
 }
 .info
 {
@@ -225,12 +245,7 @@ button
     list-style: none;
 
     color: #969696;
-    /*
-    -webkit-margin-before: 1em;
-    -webkit-margin-after: 1em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
-    -webkit-padding-start: 40px;*/
+
 }
 .calibration li
 {
@@ -307,29 +322,53 @@ button
 
 .disconnect_button
 {
-    font: 18px Arial;
+    font: 18px;
 
     width: 174px;
     height: 46px;
     margin: 16px;
 
     border: #b2aabe solid 1px;
-    background: #e6e6e6;
+    background: rgb(195,190,207);
+
+    cursor:pointer;
+}
+
+.disconnect_button:hover{
+
+    width:174px;
+    height: 46px;
+    background:rgb(215,210,225);
+}
+.disconnect_ch{
+    font-size:20px;
+    position: absolute;
+    top:16px;
+    left:65px;
+    color:rgb(51,80,93);
+}
+.disconnect_eng{
+    position: absolute;
+    top:40px;
+    left:60px;
+    font-size: 18px;
+    color:rgb(123,120,134);
 }
 /*icons*/
 .icons
 {
     position: absolute;
-    top: 420px;
-    right: 50px;
+    top: 430px;
+    right: 25px;
 
     list-style: none;
 }
 .icons li
 {
+    font-size: 11px;
     float: left;
 
-    margin-right: 10px;
+    margin-right: 12px;
 }
 .icons a
 {
@@ -339,6 +378,9 @@ button
     text-decoration: none;
 
     color: #ad3b23;
+}
+.icons a:hover{
+    text-decoration: underline;
 }
 #link_info
 {
