@@ -7,34 +7,16 @@
 }
 body
 {
-    font-family: 'Microsoft YaHei', 'SimHei', 'Apple LiGothic Medium';
-
     min-width: 768px;
     min-height: 480px;
 
-    background: #e6e6e6 url(../image/popup_bg.png) no-repeat top right;
+    background: #e6e6e6;
 }
-
 div
 {
     display: block;
 }
 
-button
-{
-    /*
-    text-rendering: auto;
-    letter-spacing: normal;
-    word-spacing: normal;
-    text-transform: none;
-    text-shadow: none;
-    display:inline-block;*/
-    text-align: center;
-}
-.eng
-{
-    font-size: 13px;
-}
 #center
 {
     position: relative;
@@ -60,32 +42,38 @@ button
 }
 .smile_face_eye1
 {
-    width: 0;
-    height:0;
     position: absolute;
-    top: 45px;
+    top: 50px;
     left: 30px;
-    border: 5px solid white;
+
+    width: 0;
+    height: 0;
+
     color: white;
+    border: 5px solid white;
 }
 .smile_face_eye2
 {
-    width: 0;
-    height:0;
     position: absolute;
-    top:80px;
-    left:30px;
-    color:white;
+    top: 85px;
+    left: 30px;
+
+    width: 0;
+    height: 0;
+
+    color: white;
     border: 5px solid white;
 }
 
 .smile_face_p
 {
+    font-family: Helvetica, 'Microsoft YaHei', Arial,sans-serif;
+    font-size: 80px;
     font-weight: lighter;
-    font-size: 90px;
+
     position: absolute;
-    top: 15px;
-    left: 50px;
+    top: 30px;
+    left: 55px;
 
     color: white;
 }
@@ -99,8 +87,7 @@ button
     top: 125px;
     left: 25px;
 
-    color: rgba(231,227,228,0.8);
-
+    color: rgba(231,227,228,.8);
 }
 .welcome_eng
 {
@@ -112,9 +99,7 @@ button
     top: 170px;
     left: 25px;
 
-    color: rgba(231,227,228,0.6);
-
-
+    color: rgba(231,227,228,.6);
 }
 .red_triangle
 {
@@ -124,7 +109,6 @@ button
 
     width: 0;
     height: 0;
-    /*background: #ffffff;*/
 
     border-top: 48px solid #e64e2e;
     border-right: 48px solid transparent;
@@ -145,15 +129,29 @@ button
     border-bottom: 0;
     border-left: 16px solid #ccc;
 }
-.grey_oval{
-    position:absolute;
-    top:360px;
-    left:100px;
-    width:400px;
-    height:20px;
-    background:rgba(213,213,213,0.2);
-    z-index:-20;
-    border-radius:100px/50px;
+.grey_oval
+{
+    position: absolute;
+    z-index: -20;
+    top: 360px;
+    left: 100px;
+
+    width: 400px;
+    height: 20px;
+
+    border-radius: 100px/50px;
+    background: rgba(213,213,213,.2);
+}
+.red_background
+{
+    position: relative;
+    top: 0;
+    left: 340px;
+
+    width: 600px;
+    height: 70px;
+
+    background: linear-gradient(to bottom left, rgba(251,217,215,.6), #e6e6e6);
 }
 .info
 {
@@ -177,11 +175,6 @@ button
     float: left;
 
     color: #e64e2e;
-    /*
-    -webkit-margin-before: 0.83em;
-    -webkit-margin-after: 0.83em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;*/
 }
 .info_content
 {
@@ -233,7 +226,8 @@ button
 
     background: url(../image/usage_bg.gif) repeat-y;
 }
-.calibration
+
+.usage_mark
 {
     font-family: Verdana,Geneva,sans-serif;
     font-size: 13px;
@@ -245,9 +239,8 @@ button
     list-style: none;
 
     color: #969696;
-
 }
-.calibration li
+.usage_mark li
 {
     float: left;
 
@@ -328,32 +321,38 @@ button
     height: 46px;
     margin: 16px;
 
+    cursor: pointer;
+
     border: #b2aabe solid 1px;
     background: rgb(195,190,207);
-
-    cursor:pointer;
-
 }
 
-.disconnect_button:hover{
-
-    width:174px;
+.disconnect_button:hover
+{
+    width: 174px;
     height: 46px;
-    background:rgb(215,210,225);
+
+    background: rgb(215,210,225);
 }
-.disconnect_ch{
-    font-size:20px;
+.disconnect_ch
+{
+    font-size: 20px;
+
     position: absolute;
-    top:16px;
-    left:65px;
-    color:rgb(51,80,93);
+    top: 16px;
+    left: 65px;
+
+    color: rgb(51,80,93);
 }
-.disconnect_eng{
-    position: absolute;
-    top:40px;
-    left:60px;
+.disconnect_eng
+{
     font-size: 18px;
-    color:rgb(123,120,134);
+
+    position: absolute;
+    top: 40px;
+    left: 60px;
+
+    color: rgb(123,120,134);
 }
 /*icons*/
 .icons
@@ -367,6 +366,7 @@ button
 .icons li
 {
     font-size: 11px;
+
     float: left;
 
     margin-right: 12px;
@@ -380,7 +380,8 @@ button
 
     color: #ad3b23;
 }
-.icons a:hover{
+.icons a:hover
+{
     text-decoration: underline;
 }
 #link_info

@@ -86,7 +86,7 @@ function count(test)
       return false;
     }
     //整数范围
-    var integer = parseInt(list[a]);
+    var integer = parseInt(list[a],10);
     if(integer < 0 || integer > 255)
     {
       return false;
