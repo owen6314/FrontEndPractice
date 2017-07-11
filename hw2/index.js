@@ -53,6 +53,8 @@ function count(test)
 }
 
   function isIPv4(s) {
+  if(s.length >= 30)
+    return false
   var list;
   list = s.split('.');
   //不能被解析为四部分
@@ -93,14 +95,81 @@ function count(test)
   return true;
 }
 
-function map(mapper, input) {
-  // TODO:
-  return null;
+function map(mapper,input)
+{
+  var tmp_ans = [];
+  var properties = Object.getOwnPropertyNames(input);
+  var a;
+  for(a in properties)
+  {
+    var temp;
+    temp = mapper(properties[a],input[properties[a]]);
+    var b;
+    for(b in temp)
+    {
+      var flag = false;
+      var c;
+      for(c in tmp_ans)
+      {
+        //已经存在该属性
+        if(tmp_ans[c][0] == temp[b][0])
+        {
+          //已经是数组
+          if(tmp_ans[c][1] instanceof Array)
+          {
+            tmp_ans[c][1].push(temp[b][1]);
+            console.info("Array");
+          }
+          else
+          {
+            var temp_int = tmp_ans[c][1];
+            tmp_ans[c][1] = new Array();
+            tmp_ans[c][1].push(temp_int);
+            tmp_ans[c][1].push(temp[b][1]);
+          }
+          flag = true;
+          break;
+        }
+      }
+      if(flag == false)
+      {
+        tmp_ans.push(temp[b]);
+      }
+    }
+  }
+  var d;
+  for(d in tmp_ans)
+  {
+    if(typeof(tmp_ans[d][1]) == 'number')
+    {
+      //console.info(typeof tmp_ans[d][1]);
+      var temp_int = tmp_ans[d][1];
+      tmp_ans[d][1] = new Array();
+      tmp_ans[d][1].push(temp_int);
+    }
+  }
+  var map_result = new Object();
+  var i;
+  for(i in tmp_ans)
+  {
+    map_result[tmp_ans[i][0]] = tmp_ans[i][1]; 
+  }
+  //console.info(result);
+  return map_result;
 }
 
-function reduce(reducer, input) {
-  // TODO:
-  return null;
+function reduce(reducer, input)
+{
+  var reduce_result = new Object();
+  var reduce_properties = Object.getOwnPropertyNames(input);
+  tmp_array = [];
+  var i;
+  for(i  in reduce_properties)
+  {
+    var tmp_array = reducer(reduce_properties[i], input[reduce_properties[i]]);
+    reduce_result[tmp_array[0]] = tmp_array[1];
+  }
+  return reduce_result;
 }
 
 function stringIterator(s) {
@@ -113,3 +182,4 @@ function equal(o1, o2) {
   // TODO:
   return true;
 }
+
