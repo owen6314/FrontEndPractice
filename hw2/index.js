@@ -75,7 +75,6 @@ function count(test)
     {
       if(isNaN(list[a][b]))
       {
-        //console.info("list[a][b]");
         return false;
       }
     }
@@ -172,10 +171,42 @@ function reduce(reducer, input)
   return reduce_result;
 }
 
-function stringIterator(s) {
-  // you can modify funciton to class
-  // TODO:
-  return null;
+"use strict";
+function stringIterator(s)
+{
+  var o = new Object();
+  o.src = s;
+  o.pos = 0;
+  o.hasNext = function()
+  {
+    if(o.pos == o.src.length)
+      return false;
+    else
+      return true;
+  }
+  o.nextValue = function()
+  {
+    if(o.pos != o.src.length)
+    {
+      o.pos++;
+      return o.src[this.pos - 1];
+    }
+    else
+    {
+      return null;
+    }
+  }
+  o[Symbol.iterator] = function()
+  {
+    var index = -1;
+    return{
+      next(){
+        index++;
+        return {done:index >= o.src.length, value:o.src[index]}
+      }
+    }
+  }
+  return o;
 }
 
 function equal(o1, o2) {
