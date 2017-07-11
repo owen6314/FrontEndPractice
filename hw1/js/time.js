@@ -1,3 +1,4 @@
+//change the format of time
 function two_char(n){
 	return n >= 10 ? n : "0" + n;
 }

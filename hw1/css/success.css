@@ -1,3 +1,11 @@
+@char-set: "utf-8";
+/*a try of CSS3 @font-face, use two format of fonts to display "welcome" and "欢迎", but doesn't seem to work.*/
+@font-face{
+    font-family:pingfang;
+    src:url(../font/pingfang.ttf) format('truetype'),
+    url(../font/pingfang.woff) format('woff');
+}
+/*global*/
 *
 {
     margin: 0;
@@ -79,7 +87,7 @@ div
 }
 .welcome_ch
 {
-    font-family: 'Arial Narrow';
+    font-family: pingfang,'Microsoft YaHei';
     font-size: 32px;
     font-weight: lighter;
 
@@ -91,7 +99,7 @@ div
 }
 .welcome_eng
 {
-    font-family: 'Times New Roman';
+    font-family: pingfang,sans-serif;
     font-size: 22px;
     font-weight: lighter;
 
@@ -150,7 +158,7 @@ div
 
     width: 600px;
     height: 70px;
-
+    /*CSS3's gradient background*/
     background: linear-gradient(to bottom left, rgba(251,217,215,.6), #e6e6e6);
 }
 .info
