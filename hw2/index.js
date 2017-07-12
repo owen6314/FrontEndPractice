@@ -209,104 +209,72 @@ function stringIterator(s)
   return o;
 }
 
+
+//follow the instructions in ECMA2015,change a little
+function ToPrimitive(o)
+{
+    //very special case
+    if(typeof(o.valueOf) !== "function")
+    {
+      return o + "";
+    }
+    if(typeof(o.valueOf()) !== "object")
+    {
+        return o.valueOf();
+    }
+    else
+    {
+      console.info(o+'');
+      //use a trick to replace toString()
+      return o + '';
+    }
+    
+}
 function equal(o1, o2)
 {
-  if(o1 === o2)
-    return true;
-  if(typeof(o1) === "undefined" || o1 === null)
+  if(typeof(o1) === typeof(o2))
   {
-      if(typeof(o2) ==="undefined" || o2===null)
-        return true;
-      return false;
-    }
-
-    if(typeof(o2) === "undefined" || o2 === null)
-    {
-      if(typeof(o1) === "undefined" || o1 === null)
-        return true;
-      return false;
-    }
-    if(typeof(o1) === "number")
-    {
-      if(isNaN(o1))
-        return false;
-    }
-    if(typeof(o2) === "number")
-    {
-      if(isNaN(o2))
-        return false;
-    }
-    var value1 = NaN;
-    var value2 = NaN;
-    var string1;
-    var string2;
-    if(o1 === true)
-      value1 = 1;
-    else if(o1 === false)
-      value1 = 0;
-    else if(typeof(o1)==="number")
-    {
-      value1 = o1;
-    }
-    else if(typeof(o1)==="string")
-    {
-      value1 = Number(o1);
-    }
-    else if(typeof(o1)=== "object")
-    {
-      if(typeof(o2) === "object")
-        return false;
-      string1 = o1.toString();
-      if(typeof(o2) === "string")
-      {
-        if(string1 === o2)
-          return true;
-        else
-          return false;
-      }
-      if(typeof(o2) === "function")
-        return false;
-      value1 = Number(string1);
-    }
-    else if(typeof(o1) === "function")
-    {
-      string1 = o1.toString();
-      if(o2 === string1)
-        return true;
-      value1 = Number(string1);
-    }
-    if(o2 === true)
-      value2 = 1;
-    else if(o2 === false)
-      value2 = 0;
-    else if(typeof(o2)==="number")
-    {
-      value2 = o2;
-    }
-    else if(typeof(o2)==="string")
-    {
-      value2 = Number(o2);
-    }
-    else if(typeof(o2) === "object")
-    {
-      if(typeof(o1) === "object")
-        return false;
-      string2 = o2.toString();
-      if(o1 === string2)
-        return true;
-      value2 = Number(string2);
-    }
-    else if(typeof(o1) === "function")
-    {
-      string2 = o2.toString();
-      if(o1 === string2)
-        return true;
-      value2 = Number(string2);
-    }
-    //console.info(value1);
-    //console.info(value2);
-    if(value1 === value2)
+    if(o1 === o2) 
       return true;
-    return false;
+    else
+      return false;
+  }
+  
+  if(typeof(o1) === "undefined" && o2 === null || typeof(o2) === "undefined" && o1===null)
+  {
+      return true;
+  }
+  if(typeof(o1)==="number" && typeof(o2) === "string")
+  {
+
+      return equal(o1, Number(o2));
+  }
+
+  if(typeof(o1) === "string" && typeof(o2)==="number")
+  {
+      return equal(Number(o1), o2);
+  }
+
+  if(typeof(o1) === "boolean")
+  {
+      return equal(Number(o1), o2);
+  }
+  if(typeof(o2) === "boolean")
+  {
+      return equal(o1, Number(o2));
+  }
+  //add string type
+  if((typeof(o1) ==="boolean" || typeof(o1) ==="number" || typeof(o1) === "symbol" || typeof(o1) ==="string")  && typeof(o2)==="object")
+  {
+      //preferred type is number
+      return equal(o1, ToPrimitive(o2));
+  }
+  if((typeof(o2) ==="boolean" || typeof(o2) ==="number" || typeof(o2) === "symbol" || typeof(o2) === "string") && typeof(o1)==="object")
+  {
+
+      return equal(ToPrimitive(o1), o2);
+  }
+
+  return false;
 }
 
