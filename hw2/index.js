@@ -42,8 +42,7 @@ function count(test)
 
 function isIPv4(s) 
 {
-  /*
-  //一个相对麻烦的判断方法（没有使用正则表达式）
+  //a complex way without reg
   if(s.length >= 16)
     return false
   var list;
@@ -81,11 +80,12 @@ function isIPv4(s)
       return false;
     }
   }
-  return true;*/
-  //a much simpler way
+  return true;
+  //a much simpler way(but not right)
+  /*
   var str;
   str = s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-  return str != null && str[1] <= 255 && str[2] <= 255 && str[3] <= 255 && str[4] <= 255;
+  return str != null && str[1] <= 255 && str[2] <= 255 && str[3] <= 255 && str[4] <= 255;*/
 }
 
 function map(mapper,input)
