@@ -1,16 +1,4 @@
-/*
-
-You can feel free to modify the exsisting codes.
-
-You should ensure all functions (or classes) will be submitted are in global
-scope.
-
-If you have any question, you can ask in our course wechat group.
-
-*/
-
 'use strict';
-
 function count(test) 
 {
   var Counter=
@@ -52,8 +40,11 @@ function count(test)
   return count_fun;
 }
 
-  function isIPv4(s) {
-  if(s.length >= 30)
+function isIPv4(s) 
+{
+  /*
+  //一个相对麻烦的判断方法（没有使用正则表达式）
+  if(s.length >= 16)
     return false
   var list;
   list = s.split('.');
@@ -66,7 +57,6 @@ function count(test)
     //有空串
     if(list[a]=='')
     {
-      //console.info("match");
       return false
     }
     var b;
@@ -91,7 +81,11 @@ function count(test)
       return false;
     }
   }
-  return true;
+  return true;*/
+  //a much simpler way
+  var str;
+  str = s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  return str != null && str[1] <= 255 && str[2] <= 255 && str[3] <= 255 && str[4] <= 255;
 }
 
 function map(mapper,input)
@@ -117,7 +111,7 @@ function map(mapper,input)
           if(tmp_ans[c][1] instanceof Array)
           {
             tmp_ans[c][1].push(temp[b][1]);
-            console.info("Array");
+            //console.info("Array");
           }
           else
           {
@@ -141,7 +135,6 @@ function map(mapper,input)
   {
     if(typeof(tmp_ans[d][1]) == 'number')
     {
-      //console.info(typeof tmp_ans[d][1]);
       var temp_int = tmp_ans[d][1];
       tmp_ans[d][1] = new Array();
       tmp_ans[d][1].push(temp_int);
@@ -153,7 +146,6 @@ function map(mapper,input)
   {
     map_result[tmp_ans[i][0]] = tmp_ans[i][1]; 
   }
-  //console.info(result);
   return map_result;
 }
 
@@ -171,7 +163,6 @@ function reduce(reducer, input)
   return reduce_result;
 }
 
-"use strict";
 function stringIterator(s)
 {
   var o = new Object();
@@ -224,7 +215,7 @@ function ToPrimitive(o)
     }
     else
     {
-      console.info(o+'');
+      //console.info(o+'');
       //use a trick to replace toString()
       return o + '';
     }
@@ -264,12 +255,12 @@ function equal(o1, o2)
       return equal(o1, Number(o2));
   }
   //add string type
-  if((typeof(o1) ==="boolean" || typeof(o1) ==="number" || typeof(o1) === "symbol" || typeof(o1) ==="string")  && typeof(o2)==="object")
+  if((typeof(o1) ==="boolean" || typeof(o1) ==="number" || typeof(o1) === "symbol" || typeof(o1) ==="string")  && (typeof(o2)==="object" || typeof(o2)==="function"))
   {
       //preferred type is number
       return equal(o1, ToPrimitive(o2));
   }
-  if((typeof(o2) ==="boolean" || typeof(o2) ==="number" || typeof(o2) === "symbol" || typeof(o2) === "string") && typeof(o1)==="object")
+  if((typeof(o2) ==="boolean" || typeof(o2) ==="number" || typeof(o2) === "symbol" || typeof(o2) === "string") && (typeof(o1)==="object" || typeof(o1)==="function"))
   {
 
       return equal(ToPrimitive(o1), o2);
@@ -277,4 +268,3 @@ function equal(o1, o2)
 
   return false;
 }
-
