@@ -51,13 +51,9 @@ var jQuery = function(selector)
 }*/
 
 jQuery.prototype.elem = [];
+
+
 //following methods should include the case where there is no matched elem
-jQuery.prototype.noConflict = function()
-{
-	if(window.$ === jQuery)
-		window.$ = _$;
-	return jQuery;
-};
 jQuery.prototype.attr = function(name, value)
 {
 	if(this.elem.length === 0)
@@ -108,31 +104,41 @@ jQuery.prototype.prop = function(str)
 		return true;
 	}
 };
-var $ = function(selector)
+// todo
+jQuery.prototype.addClass = function(args)
 {
-	if(selector == undefined)
-		return null;
-	var result = new jQuery(selector);
-	return result;
-	/*
-	console.info(selector);
-	/*
-	var attr = function(attribute)
+	if(typeof(args) === "string")
 	{
-		console.info(attribute);
-	}*/
-	//简单选择器，选择器中没有空格
-	//if(/\b/.test(selector) === "false")
-	//{
-		//id selector
-		/*
-		if(selector.substring(0,1) == "#")
+		var list = args.split(" ");
+		for(let i = 0; i < list.length; i++)
 		{
-			var elem = document.getElementById(selector.substring(1));
-			if(elem == null)
-				return elem;
-			
-		}*/
-		//return null;
-	//}
+			for(let j = 0; j < this.elem.length; j++)
+			{
+				var currentClass = this.elem[j].getAttribute("class");
+				//结果中的类名唯一
+				if(currentClass.search(list[i]) === -1)
+				{
+					let newClass = currentClass + ' ' + list[i];
+					this.elem[j].setAttribute("class", newClass);
+				}
+			}
+		}
+	}
+	else if(typeof(args)=== "function")
+	{
+
+	}
 }
+
+
+jQuery.prototype.noConflict = function()
+{
+	if(window.$ === jQuery)
+		window.$ = __$;
+	return jQuery;
+};
+//用__$保存原来的windwo.$,以便在noConflict的时候还原
+var __$ = window.$;
+window.jQuery = jQuery;
+//在这里改变window.$
+window.$ = jQuery;
