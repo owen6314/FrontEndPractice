@@ -1,28 +1,5 @@
 "use strict";
 
-//Array.from的支持
-//if(!Array.from)
-//{
-	Array.from = (function(args){
-
-		if(args.length==="undefined")
-		{
-			return null;
-		}
-		else
-		{
-			var list = [];
-			console.info(args[1]);
-			for(let i = 0; i < args.length; i++)
-			{
-				list.push(args[i]);
-			}
-			return list;
-		}
-	})
-//}
-
-
 //构造函数
 var jQuery = function(selector)
 {
@@ -32,13 +9,23 @@ jQuery.fn = jQuery.prototype =
 {
 	init:function(selector)
 	{
-		if(selector === null)
+		if(typeof(selector) !== "string")
 			return null;
-		this.elem = document.querySelectorAll(selector);
-		return this;
+		else
+		{
+			try{
+				//TODO
+				this.elem = document.querySelectorAll(selector);
+				return this;
+			}catch(error){
+				console.log(error);
+				return null;
+			}
+		}
 	}
-}
+};
 jQuery.fn.init.prototype = jQuery.fn;
+jQuery.prototype.elem = [];
 /*
 //注意处理元素无法找到的异常情况,此时elem长度为0
 var jQuery = function(selector)
@@ -75,7 +62,7 @@ var jQuery = function(selector)
 	}
 }*/
 
-jQuery.prototype.elem = [];
+
 
 
 //following methods should include the case where there is no matched elem
@@ -115,6 +102,8 @@ jQuery.prototype.get = function(index)
 };
 jQuery.prototype.prop = function(str)
 {
+	//A: return true/false
+	
 	if(this.elem.length === 0)
 		return null;
 	if(str == undefined)
@@ -128,6 +117,9 @@ jQuery.prototype.prop = function(str)
 	{
 		return true;
 	}
+	/*
+	//B: return value/undefined
+	return this.elem[0][str];*/
 };
 
 jQuery.prototype.addClass = function(args)
@@ -177,32 +169,87 @@ jQuery.prototype.addClass = function(args)
 		}
 	}
 	return this;
-}
+};
 jQuery.prototype.each = function(args)
 {
 	if(typeof(args) !== "function")
 		return null;
 	for(let i = 0; i < this.elem.length; i++)
 	{
-		var a = args.call(this.elem[i]);
+		var a = args.call(this.elem[i], i, this.elem[i]);
 		if(a === false)
 			break;
 	}
 	return this;
-}
+};
 
-jQuery.prototype.noConflict = function()
+//Array.from的支持,参考https://developer.mozilla.org中提供的Polyfill,有所改动
+//TODO:目前还不支持MAP类型等
+if(!Array.from)
+{
+	Array.from = (function(){
+		//  TODO:I don't know why but it works
+		return function from(arrayLike){
+			if(arrayLike == null)
+			{
+				throw new TypeError("Array.from requires an array like object - not null or undefined");
+			}
+			//先定义判读是否Callable的方法
+			var toStr = Object.prototype.toString;
+			var isCallable = function(fn){
+				return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+			}
+			var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
+			var T;
+			if(typeof(mapFn) !== "undefined")
+			{
+				if(!isCallable(mapFn))
+				{
+					throw new TypeError('Array.from:when provided, the second argument must be a function');
+				}
+				if(arguments.length > 2)
+				{
+					T = arguments[2];
+				}
+			}
+			var items = Object(arrayLike);
+			var len = items.length > 0 ? items.length : 0;
+			var A = isCallable(this) ? Object(new this(len)) : new Array(len);
+			var kValue;
+
+			for(let k = 0; k < len ;k++)
+			{
+				kValue = items[k];
+				if(mapFn)
+				{
+					A[k] = typeof T === "undefined" ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+				}
+				else
+				{
+					A[k] = kValue;
+				}
+			}
+			A.length = len;
+			return A;
+		};
+	}());
+};
+
+jQuery.prototype.noConflict = function(deep)
 {
 	if(window.$ === jQuery)
 		window.$ = __$;
+	if ( deep && window.jQuery === jQuery )
+		window.jQuery = _jQuery;
 	return jQuery;
 };
-/*
+
 //用__$保存原来的windwo.$,以便在noConflict的时候还原
 var __$ = window.$;
 window.jQuery = jQuery;
 //在这里改变window.$
-window.$ = jQuery;*/
+window.$ = jQuery;
+
 var m = new Map([[1,2],[2,4]]);
-var d =Array.from(m);
+var d =Array.from("kissssss");
 console.info(d);
