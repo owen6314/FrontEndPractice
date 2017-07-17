@@ -1,21 +1,160 @@
 "use strict";
 
+//与css选择器解析相关的函数
+//type = 1时为处理整个selector，type = 2时为处理无逗号的selector
+function preProcess(selector,type)
+{
+	//后代选择器统一格式，>>改为空格,多个空格改为一个
+	selector = selector.replace(">>", " ");
+	selector = selector.replace(/\s+/g, " ");
+	//便于语法解析，将模糊的状态都匹配为*（全部状态）
+	let t = selector[0];
+	if(t === "[" || t === ">" || t ==="+" || t === "#" || t ==="." || t ==="~")
+	{
+		selector = "*" + selector
+	}
+	return selector;
+}
+//为Array类型增加contains方法
+Array.prototype.contains = function(item){
+	for(let i in this)
+	{
+		if(this[i] === item)
+			return true;
+	}
+	return false;
+}
+//接受一个没有逗号的选择器selector，返回一个Array
+function findCandidate(selector)
+{
+	selector = preProcess(selector);
+	//属性[]中的内容在后面单独解析，通配符作为value
+	var symbol = new RegExp(/[\#\.\[\]\s\+\~\>]+/);
+
+	var candidate = [];
+	var symbolList = [];
+	var valueList = [];
+	//保证对于任意一个符号，记它所在位置索引为pos，则valueList[pos]为它前面的元素，valueList[pos + 1]是它后面的元素
+	valueList = selector.split(symbol);
+	var tempSelector = selector;
+	for(let i = 1; i < valueList.length; i++)
+	{
+		let tempPos = tempSelector.indexOf(valueList[i]);
+		symbolList.push(tempSelector[tempPos - 1]);
+		tempSelector = tempSelector.substring(tempPos + valueList[i].length);
+	}
+	console.info(valueList);
+	console.info(symbolList);
+	for(let i = -1; i < symbolList.length; i++)
+	{
+		//第一次找到最大的candidate集合，即通过tag或*得到全部元素
+		if(i === -1)
+		{
+			var tempCandidate = window.document.getElementsByTagName(valueList[i + 1]);
+			for(let j = 0;j < tempCandidate.length;j++)
+			{
+				candidate.push(tempCandidate[j]);
+			}
+			//console.info(typeof(candidate));
+			//console.info(candidate);
+		}
+		//后面不断在这个集合中排除元素
+		else
+		{
+			if(candidate.length === 0) return candidate;
+			//注意：.f+*, 
+			switch(symbolList[i])
+			{
+				case '.':
+					let targetClassName = valueList[i + 1];
+					for(let k = candidate.length - 1; k >= 0; k--)
+					{
+						//trick: 符合条件push，最后shift
+						//使用classList进行判断
+						//console.info(candidate[k].classList);
+						//console.info(candidate[k].className);
+						if(!candidate[k].classList.contains(targetClassName))
+						{
+							candidate.splice(k,1);
+						}
+					}
+					break;
+				case '#':
+					let targetIDName = valueList[i + 1];
+					for(let k = candidate.length - 1; k >= 0; k--)
+					{
+						//trick: 符合条件push，最后shift
+						if(candidate[k].id !== targetIDName)
+						{
+							candidate.splice(k,1);
+						}
+					}
+					break;
+				case '+':
+					break;
+				case '>':
+					break;
+				case '~':
+					break;
+				case '[':
+					break;
+				case ' ':
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	console.info(candidate);
+	return candidate;
+}
+
 //构造函数
 var jQuery = function(selector)
 {
 	return new jQuery.fn.init(selector);
 }
+
 jQuery.fn = jQuery.prototype = 
 {
 	init:function(selector)
 	{
 		if(typeof(selector) !== "string")
 			return null;
+		//只有一个通配符，单独处理
+		if(selector === "*")
+		{
+
+			return this;
+		}
 		//parse CSS selector
 		//假设没有多余空格，id和class均为小写字母开头和数字的组合
+		//改变this.elem,返回this
 
-		
+		//多个选择条件，最后要合并结果(去重)
+		else{
+			selector = preProcess(selector);
+			var selectorList = selector.split(",");
+			this.elem = [];
+			for(let i = 0; i < selectorList.length; i++)
+			{
+				//返回一个candidateList的DOM数组
+				let candidateList = findCandidate(selectorList[i]);
+				if(candidateList.length !== 0)
+				{
+					for(let j = 0; j < candidateList.length; j++)
+					{
+						if(!this.elem.contains(candidateList[j]))
+						{
+							this.elem.push(candidateList[j]);
+						}
+					}
+				}
+			}
+			return this;
+		}
 		//use querySelectorAll
+		/*
 		else
 		{
 			try{
@@ -26,49 +165,11 @@ jQuery.fn = jQuery.prototype =
 				console.log(error);
 				return null;
 			}
-		}
+		}*/
 	}
 };
 jQuery.fn.init.prototype = jQuery.fn;
 jQuery.prototype.elem = [];
-/*
-//注意处理元素无法找到的异常情况,此时elem长度为0
-var jQuery = function(selector)
-{
-	this.elem = document.querySelectorAll(selector);
-	return this;
-
-	//all elements
-	if(selector === "*")
-	{
-		this.elem = document.all();
-		return this.elem;
-	}
-	//简单选择器(不含空格)
-	if(/\s/.test(selector) == false)
-	{
-		var selectorName;
-		switch(selector.charAt(0))
-		{
-			case "#":
-				selectorName = selector.replace(/^\#/,"");
-				this.elem = document.getElementById(selectorName);
-				return this.elem;
-				break;
-			//按class查询，需要遍历dom tree
-			case ".":
-				selectorName = selector.replace(/^\./,"");
-				break;
-			default:
-				this.elem = document.getElementsByTagName(selector);
-				return this.elem;
-				break;
-		}
-	}
-}*/
-
-
-
 
 //following methods should include the case where there is no matched elem
 jQuery.prototype.attr = function(name, value)
