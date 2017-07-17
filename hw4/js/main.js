@@ -1,5 +1,7 @@
 var BGCanvas;
 var BGContext;
+var ballCanvas;
+var ballContext;
 window.smove = {};
 smove.startGame = function()
 {

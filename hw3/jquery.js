@@ -11,6 +11,11 @@ jQuery.fn = jQuery.prototype =
 	{
 		if(typeof(selector) !== "string")
 			return null;
+		//parse CSS selector
+		//假设没有多余空格，id和class均为小写字母开头和数字的组合
+
+		
+		//use querySelectorAll
 		else
 		{
 			try{
@@ -155,7 +160,6 @@ jQuery.prototype.addClass = function(args)
 			{
 				var currentClassString = this.elem[i].classList.toString();
 				var returnString = args(i, currentClassString);
-				//console.info(currentClassString);
 				this.elem[i].classList.add(returnString);
 			}
 			else
@@ -183,58 +187,63 @@ jQuery.prototype.each = function(args)
 	return this;
 };
 
-//Array.from的支持,参考https://developer.mozilla.org中提供的Polyfill,有所改动
-//TODO:目前还不支持MAP类型等
-if(!Array.from)
-{
-	Array.from = (function(){
-		//  TODO:I don't know why but it works
-		return function from(arrayLike){
-			if(arrayLike == null)
+//Array.from的支持,参考https://developer.mozilla.org中提供的Polyfill,有所改动。
+//7.16题目更新，增加arrayLike是jQuery类型时的情况
+Array.from = (function(){
+	return function from(arrayLike){
+		if(arrayLike instanceof jQuery)
+		{
+			var jarray = [];
+			for(let i = 0; i < arrayLike.elem.length; i++)
 			{
-				throw new TypeError("Array.from requires an array like object - not null or undefined");
+				jarray.push(arrayLike.elem[i]);
 			}
-			//先定义判读是否Callable的方法
-			var toStr = Object.prototype.toString;
-			var isCallable = function(fn){
-				return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
-			}
-			var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
-			var T;
-			if(typeof(mapFn) !== "undefined")
+			return jarray;
+		}
+		//下面是对Array.from的实现(7.16题目更新前完成)
+		if(arrayLike == null)
+		{
+			throw new TypeError("Array.from requires an array like object - not null or undefined");
+		}
+		//先定义判读是否Callable的方法
+		var toStr = Object.prototype.toString;
+		var isCallable = function(fn){
+			return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+		}
+		var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
+		var T;
+		if(typeof(mapFn) !== "undefined")
+		{
+			if(!isCallable(mapFn))
 			{
-				if(!isCallable(mapFn))
-				{
-					throw new TypeError('Array.from:when provided, the second argument must be a function');
-				}
-				if(arguments.length > 2)
-				{
-					T = arguments[2];
-				}
+				throw new TypeError('Array.from:when provided, the second argument must be a function');
 			}
-			var items = Object(arrayLike);
-			var len = items.length > 0 ? items.length : 0;
-			var A = isCallable(this) ? Object(new this(len)) : new Array(len);
-			var kValue;
+			if(arguments.length > 2)
+			{
+				T = arguments[2];
+			}
+		}
+		var items = Object(arrayLike);
+		var len = items.length > 0 ? items.length : 0;
+		var A = isCallable(this) ? Object(new this(len)) : new Array(len);
+		var kValue;
 
-			for(let k = 0; k < len ;k++)
+		for(let k = 0; k < len ;k++)
+		{
+			kValue = items[k];
+			if(mapFn)
 			{
-				kValue = items[k];
-				if(mapFn)
-				{
-					A[k] = typeof T === "undefined" ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
-				}
-				else
-				{
-					A[k] = kValue;
-				}
+				A[k] = typeof T === "undefined" ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
 			}
-			A.length = len;
-			return A;
-		};
-	}());
-};
-
+			else
+			{
+				A[k] = kValue;
+			}
+		}
+		A.length = len;
+		return A;
+	};
+}());
 jQuery.prototype.noConflict = function(deep)
 {
 	if(window.$ === jQuery)
@@ -244,12 +253,12 @@ jQuery.prototype.noConflict = function(deep)
 	return jQuery;
 };
 
-//用__$保存原来的windwo.$,以便在noConflict的时候还原
+//用__$保存原来的window.$,以便在noConflict的时候还原
 var __$ = window.$;
 window.jQuery = jQuery;
 //在这里改变window.$
 window.$ = jQuery;
-
+/*
 var m = new Map([[1,2],[2,4]]);
 var d =Array.from("kissssss");
-console.info(d);
+console.info(d);*/
