@@ -1,8 +1,21 @@
 "use strict";
 
+
+//判断一个object是否是dom元素
+function isDom(item)
+{
+	if(typeof HTMLElement === 'object')
+	{
+		return item instanceof HTMLElement;
+	}
+	else
+	{
+		return item && typeof item === 'object' && item.nodeType === 1 && typeof item.nodeName === "string";
+	}
+}
+
 //与css选择器解析相关的函数
-//type = 1时为处理整个selector，type = 2时为处理无逗号的selector
-function preProcess(selector,type)
+function preProcess(selector)
 {
 	//后代选择器统一格式，>>改为空格,多个空格改为一个
 	selector = selector.replace(">>", " ");
@@ -15,7 +28,8 @@ function preProcess(selector,type)
 	}
 	return selector;
 }
-//为Array类型增加contains方法
+
+//为Array类型增加contains方法，判断一个元素是否在数组中
 Array.prototype.contains = function(item){
 	for(let i in this)
 	{
@@ -24,6 +38,22 @@ Array.prototype.contains = function(item){
 	}
 	return false;
 }
+
+//找到所有的孩子节点
+function findAllChildNodes(node)
+{
+	var child = [];
+	if(node.hasChildNodes())
+	{
+		var temp = node.getElementsByTagName("*")
+		for(let i = 0; i < temp.length; i++)
+		{
+			child.push(temp[i]);
+		}
+	}
+	return child;
+}
+
 //接受一个没有逗号的选择器selector，返回一个Array
 function findCandidate(selector)
 {
@@ -37,14 +67,21 @@ function findCandidate(selector)
 	//保证对于任意一个符号，记它所在位置索引为pos，则valueList[pos]为它前面的元素，valueList[pos + 1]是它后面的元素
 	valueList = selector.split(symbol);
 	var tempSelector = selector;
+	tempSelector = tempSelector.substring(tempSelector.indexOf(valueList[0]) + valueList[0].length);
+
 	for(let i = 1; i < valueList.length; i++)
 	{
+		if(valueList[i] === "")
+		{
+			symbolList.push(tempSelector[0]);
+			continue;
+		}
 		let tempPos = tempSelector.indexOf(valueList[i]);
 		symbolList.push(tempSelector[tempPos - 1]);
 		tempSelector = tempSelector.substring(tempPos + valueList[i].length);
 	}
-	console.info(valueList);
-	console.info(symbolList);
+	//console.info(valueList);
+	//console.info(symbolList);
 	for(let i = -1; i < symbolList.length; i++)
 	{
 		//第一次找到最大的candidate集合，即通过tag或*得到全部元素
@@ -65,6 +102,7 @@ function findCandidate(selector)
 			//注意：.f+*, 
 			switch(symbolList[i])
 			{
+				//.和#直接对candidate进行筛选
 				case '.':
 					let targetClassName = valueList[i + 1];
 					for(let k = candidate.length - 1; k >= 0; k--)
@@ -83,29 +121,184 @@ function findCandidate(selector)
 					let targetIDName = valueList[i + 1];
 					for(let k = candidate.length - 1; k >= 0; k--)
 					{
-						//trick: 符合条件push，最后shift
 						if(candidate[k].id !== targetIDName)
 						{
 							candidate.splice(k,1);
 						}
 					}
 					break;
+				// “ ”，+和>将candidate换成对应的candidate
 				case '+':
+					for(let k = 0, len = candidate.length; k < len; k++)
+					{
+						if(candidate[0].nextElementSibling != null)
+						{
+							candidate.push(candidate[0].nextElementSibling);
+						}
+						candidate.shift();
+					}
+					if(symbolList[i + 1] !== "." && symbolList[i + 1] !== "#" && valueList[i + 1]!=="*")
+					{
+						for(let k = candidate.length - 1; k >= 0; k--)
+						{
+							if(candidate[k].tagName.toLowerCase() !== valueList[i + 1])
+							{
+								candidate.splice(k,1);
+							}
+						}
+					}
 					break;
 				case '>':
-					break;
-				case '~':
-					break;
-				case '[':
+					for(let k = 0,len = candidate.length; k < len; k++)
+					{
+						if(candidate[0].hasChildNodes())
+						{
+							let child = candidate[0].childNodes;
+							for(let m = 0; m < child.length; m++)
+							{
+								if(isDom(child[m]))
+									candidate.push(child[m]);
+							}
+						}
+						candidate.shift();
+					}
+					if(symbolList[i + 1] !== "." && symbolList[i + 1] !== "#"&& valueList[i + 1]!=="*")
+					{
+						for(let k = candidate.length - 1; k >= 0; k--)
+						{
+							if(candidate[k].tagName.toLowerCase() !== valueList[i + 1])
+							{
+								candidate.splice(k,1);
+							}
+						}
+					}
 					break;
 				case ' ':
+					//找到所有的后代节点
+					//在循环中不能使用candidate.length,因为在candidate不断push的过程中，长度在变化
+					for(let k = 0, len = candidate.length; k < len; k++)
+					{
+						if(candidate[0].hasChildNodes())
+						{
+							let child = findAllChildNodes(candidate[0]);
+							for(let m = 0; m < child.length; m++)
+							{
+								candidate.push(child[m]);
+							}
+						}
+						candidate.shift();
+					}
+					if(symbolList[i + 1] !== "." && symbolList[i + 1] !== "#"&& valueList[i + 1]!=="*")
+					{
+						for(let k = candidate.length - 1; k >= 0; k--)
+						{
+							if(candidate[k].tagName.toLowerCase() !== valueList[i + 1])
+							{
+								candidate.splice(k,1);
+							}
+						}
+					}
 					break;
+				//[]对属性进行筛选
+				case '[':
+
+					let attrString = valueList[i + 1];
+					let attrString_list = attrString.split("=");
+
+					//没有等号，筛选一切有该属性的节点
+					if(attrString_list.length === 1)
+					{
+						for(let k = candidate.length - 1; k >= 0; k--)
+						{
+							if(!candidate[k].hasAttribute(attrString))
+							{
+								candidate.splice(k,1);
+							}
+						}
+					}
+					//属性选择器
+					else
+					{
+						switch(attrString_list[0][attrString_list[0].length - 1])
+						{
+							//prefixed
+							case'^':
+								for(let k = candidate.length - 1; k >= 0; k--)
+								{
+									let targetAttr = attrString_list[0].substring(0,attrString_list[0].length - 1);
+									if(!candidate[k].hasAttribute(targetAttr))
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+									let tempAttr = candidate[k].getAttribute(targetAttr);
+									if(tempAttr.indexOf(attrString_list[1]) !== 0)
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+								}
+								break;
+							//suffixed
+							case'$':
+								for(let k = candidate.length - 1; k >= 0; k--)
+								{
+									let targetAttr = attrString_list[0].substring(0,attrString_list[0].length - 1);
+									if(!candidate[k].hasAttribute(targetAttr))
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+									let tempAttr = candidate[k].getAttribute(targetAttr);
+									if(tempAttr.indexOf(attrString_list[1]) !== (tempAttr.length - attrString_list[1].length))
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+								}
+								break;
+							case'*':
+								for(let k = candidate.length - 1; k >= 0; k--)
+								{
+									let targetAttr = attrString_list[0].substring(0,attrString_list[0].length - 1);
+									if(!candidate[k].hasAttribute(targetAttr))
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+									let tempAttr = candidate[k].getAttribute(targetAttr);
+									if(tempAttr.indexOf(attrString_list[1]) === -1)
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+								}
+								break;
+							default:
+								//console.info("default");
+								for(let k = candidate.length - 1; k >= 0; k--)
+								{
+									if(!candidate[k].hasAttribute(attrString_list[0]))
+									{
+										candidate.splice(k,1);
+										continue;
+									}
+									let tempAttr = candidate[k].getAttribute(attrString_list[0]);
+									if(tempAttr !== attrString_list[1])
+									{
+										candidate.splice(k,1);
+									}
+								}
+								break;
+						}
+					}
+					break;
+				//default中有']'
 				default:
 					break;
 			}
 		}
 	}
-	console.info(candidate);
 	return candidate;
 }
 
@@ -119,18 +312,33 @@ jQuery.fn = jQuery.prototype =
 {
 	init:function(selector)
 	{
+
 		if(typeof(selector) !== "string")
-			return null;
+		{
+			//由DOM节点新建jQuery对象
+			if(isDom(selector))
+			{
+				this.elem = [];
+
+				this.elem.push(selector);
+				return this;
+			}
+			else
+			{
+				return null;
+			}
+			
+		}
+
 		//只有一个通配符，单独处理
 		if(selector === "*")
 		{
-
+			this.elem = document.getElementsByTagName("*");
 			return this;
 		}
 		//parse CSS selector
 		//假设没有多余空格，id和class均为小写字母开头和数字的组合
 		//改变this.elem,返回this
-
 		//多个选择条件，最后要合并结果(去重)
 		else{
 			selector = preProcess(selector);
@@ -172,6 +380,7 @@ jQuery.fn.init.prototype = jQuery.fn;
 jQuery.prototype.elem = [];
 
 //following methods should include the case where there is no matched elem
+
 jQuery.prototype.attr = function(name, value)
 {
 	if(this.elem.length === 0)
@@ -189,6 +398,7 @@ jQuery.prototype.attr = function(name, value)
 		return this.elem[0].getAttribute(name);
 	}
 };
+
 //不能使用if(index),因为0==false
 jQuery.prototype.get = function(index)
 {
@@ -206,6 +416,7 @@ jQuery.prototype.get = function(index)
 		return this.elem;
 	}
 };
+
 jQuery.prototype.prop = function(str)
 {
 	//A: return true/false
@@ -353,13 +564,29 @@ jQuery.prototype.noConflict = function(deep)
 		window.jQuery = _jQuery;
 	return jQuery;
 };
-
+//在使用symbol.iterator的过程中，在next()函数内this的值会发生变化，所以要提前在外部定义相关变量，以便进行迭代。
+jQuery.prototype[Symbol.iterator] = function()
+{
+	var index = 0;
+	var jQuery_new = this;
+	return{
+		next(){
+			if(index < jQuery_new.elem.length)
+			{
+				let returnedItem = jQuery_new.elem[index];
+				index++;
+				return {value: returnedItem, done:false};
+			}
+			else
+			{
+				return {done:true};
+			}
+		}
+	}
+};
 //用__$保存原来的window.$,以便在noConflict的时候还原
 var __$ = window.$;
 window.jQuery = jQuery;
 //在这里改变window.$
 window.$ = jQuery;
-/*
-var m = new Map([[1,2],[2,4]]);
-var d =Array.from("kissssss");
-console.info(d);*/
+
