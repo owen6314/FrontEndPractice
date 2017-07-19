@@ -1,6 +1,5 @@
 "use strict";
-
-
+//前端课第三次小作业，使用手动解析CSS的方式代替了querySelectorAll
 //判断一个object是否是dom元素
 function isDom(item)
 {
@@ -380,7 +379,6 @@ jQuery.fn.init.prototype = jQuery.fn;
 jQuery.prototype.elem = [];
 
 //following methods should include the case where there is no matched elem
-
 jQuery.prototype.attr = function(name, value)
 {
 	if(this.elem.length === 0)
@@ -420,7 +418,6 @@ jQuery.prototype.get = function(index)
 jQuery.prototype.prop = function(str)
 {
 	//A: return true/false
-	
 	if(this.elem.length === 0)
 		return null;
 	if(str == undefined)
@@ -434,9 +431,6 @@ jQuery.prototype.prop = function(str)
 	{
 		return true;
 	}
-	/*
-	//B: return value/undefined
-	return this.elem[0][str];*/
 };
 
 jQuery.prototype.addClass = function(args)
@@ -556,7 +550,7 @@ Array.from = (function(){
 		return A;
 	};
 }());
-jQuery.prototype.noConflict = function(deep)
+jQuery.noConflict = function(deep)
 {
 	if(window.$ === jQuery)
 		window.$ = __$;
