@@ -28,21 +28,19 @@ function drawCircle(ctx, x, y, r)
     ctx.fill();
 }
 //绘制星星，参数中需要有context画笔
-function drawStar(cxt, x, y, r, R, rot)
+function drawFilledStar(cxt, x, y, r, R,rot,color)
 {
     cxt.beginPath();
-    for(var i = 0; i < 5; i ++){
-        cxt.lineTo( Math.cos( (18 + i*72 - rot)/180 * Math.PI) * R + x,
-                    -Math.sin( (18 + i*72 - rot)/180 * Math.PI) * R + y)
-        cxt.lineTo( Math.cos( (54 + i*72 - rot)/180 * Math.PI) * r + x,
-                    -Math.sin( (54 + i*72 - rot)/180 * Math.PI) * r + y)
+    for(var i = 0; i < 5; i ++)
+    {
+        cxt.lineTo( Math.cos( (18 + i*72 - rot)/180 * Math.PI) * R + x,-Math.sin( (18 + i*72 - rot)/180 * Math.PI) * R + y);
+        cxt.lineTo( Math.cos( (54 + i*72 - rot)/180 * Math.PI) * r + x,-Math.sin( (54 + i*72 - rot)/180 * Math.PI) * r + y);
     }
     cxt.closePath();
     cxt.lineWidth = 3;
-    cxt.fillStyle = "#fb3";
-    cxt.strokeStyle = "#fb5";
+    cxt.fillStyle = color;
+    cxt.strokeStyle = color;
     cxt.lineJoin = "round";
-
     cxt.fill();
     cxt.stroke();
 }

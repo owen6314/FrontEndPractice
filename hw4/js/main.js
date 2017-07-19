@@ -3,11 +3,12 @@ var BGContext;
 var mapCanvas;
 var mapContext;
 var disWidth, disHeight, disX,disY,disR;
-//球心所在位置的数组
+//格子中心所在位置的数组
 var centerArray_x = [];
 var centerArray_y = [];
 var diffframetime,lastframetime;
-var whiteBall;
+var whiteBall,star;
+var score; //分数
 var keysDown = {};
 
 window.smove = {};
@@ -24,7 +25,6 @@ smove.init = function()
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//绘制背景
-	//背景的宽度与高度
 	var BGWid, BGHei;
 	BGWid = BGCanvas.width;
 	BGHei = BGCanvas.height;
@@ -36,8 +36,8 @@ smove.init = function()
 	BGContext.fill();
 
 	//分数、历史最高分数
-
-	//星星
+	score = 0;
+	//背景中星星
 	//以下为mapCanvas绘制
 	//绘制圆角矩形游戏区域
 	disWidth = mapCanvas.width;
@@ -57,6 +57,10 @@ smove.init = function()
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
 	whiteBall.drawWhiteBall();
+	//绘制奖励的星星
+	star = new starObject();
+	star.init();
+	star.drawStar();
 }
 smove.loop = function()
 {
@@ -68,8 +72,18 @@ smove.loop = function()
 	drawMap();
 	whiteBall.updateWhiteBall();
 	whiteBall.drawWhiteBall();
+	if(whiteBall.column === star.column && whiteBall.row === star.row)
+	{
+		smove.getStar();
+	}
+	star.rotate();
+	star.drawStar();
 }
-
+smove.getStar = function()
+{
+	score++;
+	star.reborn();
+}
 
 //各种物体类
 //小球的row和column都是按照0，1，2进行编排的
@@ -82,6 +96,7 @@ var whiteBallObject = function()
 	this.x;
 	this.y;
 	this.speed; //白球的运动速度
+	this.isNormal; //按键表现是否正常
 }
 whiteBallObject.prototype.init = function()
 {
@@ -90,6 +105,7 @@ whiteBallObject.prototype.init = function()
 	this.x = centerArray_x[this.column];
 	this.y = centerArray_y[this.row];
 	this.speed = 100;
+	this.isNormal = true;
 }
 whiteBallObject.prototype.drawWhiteBall = function()
 {
@@ -97,72 +113,189 @@ whiteBallObject.prototype.drawWhiteBall = function()
 }
 whiteBallObject.prototype.updateWhiteBall = function()
 {
-	if (37 in keysDown) 
-	{ //←
-        if(this.column !== 0)
-        {
-        	if(this.x > centerArray_x[this.column - 1])
-        	{
-        		this.x -= this.speed;
-        		if(this.x <= centerArray_x[this.column - 1])
-        		{
-        			this.x = centerArray_x[this.column - 1];
-        			this.column--;
-        			delete keysDown[37];
-        		}
-        	}
-        }
-    }
-	if (38 in keysDown) 
-	{ //↑
-		if(this.row !== 0)
-		{
-			if(this.y > centerArray_y[this.row - 1])
-        	{
-        		this.y -= this.speed;
-        		if(this.y <= centerArray_y[this.row - 1])
-        		{
-        			this.y = centerArray_y[this.row - 1];
-        			this.row--;
-        			delete keysDown[38];
-        		}
-        	}
-        }
-    }
-    if (39 in keysDown) 
-    {//→
-        if(this.column !== 2)
-		{
-			if(this.x < centerArray_x[this.column + 1])
-        	{
-        		this.x += this.speed;
-        		if(this.x >= centerArray_x[this.column + 1])
-        		{
-        			this.x = centerArray_x[this.column + 1];
-        			this.column++;
-        			delete keysDown[39];
-        		}
-        	}
-        }
-    }
-    
-    if (40 in keysDown) 
-    { //↓
-       	if(this.row !== 2)
-		{
-			if(this.y < centerArray_y[this.row + 1])
-        	{
-        		this.y += this.speed;
-        		if(this.y >= centerArray_y[this.row + 1])
-        		{
-        			this.y = centerArray_y[this.row + 1];
-        			this.row++;
-        			delete keysDown[40];
-        		}
-        	}
-        }
-    }
+	if(this.isNormal)
+	{
+		if (37 in keysDown) 
+		{ //←
+	        if(this.column !== 0)
+	        {
+	        	if(this.x > centerArray_x[this.column - 1])
+	        	{
+	        		this.x -= this.speed;
+	        		if(this.x <= centerArray_x[this.column - 1])
+	        		{
+	        			this.x = centerArray_x[this.column - 1];
+	        			this.column--;
+	        			delete keysDown[37];
+	        		}
+	        	}
+	        }
+	    }
+		if (38 in keysDown) 
+		{ //↑
+			if(this.row !== 0)
+			{
+				if(this.y > centerArray_y[this.row - 1])
+	        	{
+	        		this.y -= this.speed;
+	        		if(this.y <= centerArray_y[this.row - 1])
+	        		{
+	        			this.y = centerArray_y[this.row - 1];
+	        			this.row--;
+	        			delete keysDown[38];
+	        		}
+	        	}
+	        }
+	    }
+	    if (39 in keysDown) 
+	    {//→
+	        if(this.column !== 2)
+			{
+				if(this.x < centerArray_x[this.column + 1])
+	        	{
+	        		this.x += this.speed;
+	        		if(this.x >= centerArray_x[this.column + 1])
+	        		{
+	        			this.x = centerArray_x[this.column + 1];
+	        			this.column++;
+	        			delete keysDown[39];
+	        		}
+	        	}
+	        }
+	    }
+	    
+	    if (40 in keysDown) 
+	    { //↓
+	       	if(this.row !== 2)
+			{
+				if(this.y < centerArray_y[this.row + 1])
+	        	{
+	        		this.y += this.speed;
+	        		if(this.y >= centerArray_y[this.row + 1])
+	        		{
+	        			this.y = centerArray_y[this.row + 1];
+	        			this.row++;
+	        			delete keysDown[40];
+	        		}
+	        	}
+	        }
+	    }
+	}
+	//反向操作的情况
+	else
+	{
+		if (39 in keysDown) 
+		{ //→
+	        if(this.column !== 0)
+	        {
+	        	if(this.x > centerArray_x[this.column - 1])
+	        	{
+	        		this.x -= this.speed;
+	        		if(this.x <= centerArray_x[this.column - 1])
+	        		{
+	        			this.x = centerArray_x[this.column - 1];
+	        			this.column--;
+	        			delete keysDown[39];
+	        		}
+	        	}
+	        }
+	    }
+		if (40 in keysDown) 
+		{ //↑
+			if(this.row !== 0)
+			{
+				if(this.y > centerArray_y[this.row - 1])
+	        	{
+	        		this.y -= this.speed;
+	        		if(this.y <= centerArray_y[this.row - 1])
+	        		{
+	        			this.y = centerArray_y[this.row - 1];
+	        			this.row--;
+	        			delete keysDown[40];
+	        		}
+	        	}
+	        }
+	    }
+	    if (37 in keysDown) //←
+	    {
+	        if(this.column !== 2)
+			{
+				if(this.x < centerArray_x[this.column + 1])
+	        	{
+	        		this.x += this.speed;
+	        		if(this.x >= centerArray_x[this.column + 1])
+	        		{
+	        			this.x = centerArray_x[this.column + 1];
+	        			this.column++;
+	        			delete keysDown[37];
+	        		}
+	        	}
+	        }
+	    }
+	    
+	    if (38 in keysDown) 
+	    { //↓
+	       	if(this.row !== 2)
+			{
+				if(this.y < centerArray_y[this.row + 1])
+	        	{
+	        		this.y += this.speed;
+	        		if(this.y >= centerArray_y[this.row + 1])
+	        		{
+	        			this.y = centerArray_y[this.row + 1];
+	        			this.row++;
+	        			delete keysDown[38];
+	        		}
+	        	}
+	        }
+	    }
+	}
 }
+
+//星星类
+var starObject = function()
+{
+	this.column = 0;
+	this.row = 0;
+	this.color;
+	this.rot = 0;
+}
+starObject.prototype.init = function()
+{
+	this.column = 0;
+	this.row = 0;
+	if(score % 10 !== 9)
+		this.color = "yellow";
+	else
+		this.color = "pink";
+	this.rot = 0;
+}
+starObject.prototype.rotate = function()
+{
+	this.rot = (this.rot + 1) % 72;
+}
+starObject.prototype.reborn = function()
+{
+	let tcolumn = Math.floor(Math.random() * 3);
+	let trow = Math.floor(Math.random() * 3);
+	while(tcolumn === this.column && trow === this.row)
+	{
+		tcolumn = Math.floor(Math.random() * 3);
+		trow = Math.floor(Math.random() * 3);
+	}
+	this.column = tcolumn;
+	this.row = trow;
+	if(score % 10 !== 9)
+		this.color = "yellow";
+	else
+		this.color = "pink";
+	this.rot = 0;
+}
+starObject.prototype.drawStar = function()
+{
+	drawFilledStar(mapContext,centerArray_y[this.column],centerArray_x[this.row],10,20,this.rot,this.color);
+}
+
 
 //键盘输入
 addEventListener("keydown", function (e) 

@@ -203,7 +203,11 @@ function findCandidate(selector)
 
 					let attrString = valueList[i + 1];
 					let attrString_list = attrString.split("=");
-
+					
+					if(attrString_list.length === 2)
+					{
+						attrString_list[1] = attrString_list[1].replace(/\"/g,"");
+					}
 					//没有等号，筛选一切有该属性的节点
 					if(attrString_list.length === 1)
 					{
