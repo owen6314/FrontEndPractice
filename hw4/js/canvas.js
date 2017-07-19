@@ -13,3 +13,22 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r)
 	this.closePath();
 	return this;
 }
+//绘制星星，参数中需要有context画笔
+function drawStar(cxt, x, y, r, R, rot)
+{
+    cxt.beginPath();
+    for(var i = 0; i < 5; i ++){
+        cxt.lineTo( Math.cos( (18 + i*72 - rot)/180 * Math.PI) * R + x,
+                    -Math.sin( (18 + i*72 - rot)/180 * Math.PI) * R + y)
+        cxt.lineTo( Math.cos( (54 + i*72 - rot)/180 * Math.PI) * r + x,
+                    -Math.sin( (54 + i*72 - rot)/180 * Math.PI) * r + y)
+    }
+    cxt.closePath();
+    cxt.lineWidth = 3;
+    cxt.fillStyle = "#fb3";
+    cxt.strokeStyle = "#fb5";
+    cxt.lineJoin = "round";
+
+    cxt.fill();
+    cxt.stroke();
+}

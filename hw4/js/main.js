@@ -2,16 +2,18 @@ var BGCanvas;
 var BGContext;
 var mapCanvas;
 var mapContext;
-var contentCanvas;
-var contentContext;
+var ballCanvas;
+var ballContext;
 //绘制地图时用到的x与y坐标的数组
 var xArray = [0,90,180];
 var yArray = [0,50,100];
 //白色小球的球心所在位置的数组
+
 window.smove = {};
 smove.startGame = function()
 {
 	smove.init();
+	//smove.loop();
 }
 smove.init = function()
 {
@@ -28,6 +30,12 @@ smove.init = function()
 	BGContext.fillStyle = bg;
 	BGContext.rect(0,0,BGWid,BGHei);
 	BGContext.fill();
+	//分数、历史最高分数
+
+
+
+
+	//星星
 	/*
 	//绘制矩形游戏区域
 	var disWid, disHeight, disX,disY,disR;
@@ -38,7 +46,6 @@ smove.init = function()
 	disR = 0.25 * disWid;
 	BGContext.strokeStyle = "#ffffff"
 	BGContext.roundRect(disX,disY,disWid,disHeight,disR).stroke();*/
-
 	//绘制圆角矩形游戏区域
 	mapCanvas = document.getElementById("map");
 	mapContext = mapCanvas.getContext("2d");
@@ -67,14 +74,8 @@ smove.init = function()
 		mapContext.strokeStyle = "#FFFFFF";
 		mapContext.stroke();
 	}
-	//一条直线
-	/*
-	BGContext.moveTo(0,0);
-	BGContext.lineTo(100,100);
-	BGContext.lineWidth = 2;
-	BGContext.strokeStyle = "#F5270B"
-	BGContext.stroke();*/
-
+	//绘制白色小球，小球初始位置在中间格
+	//ballCanvas = 
 }
 
 smove.startGame();
