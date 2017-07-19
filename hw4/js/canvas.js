@@ -1,3 +1,4 @@
+//绘图函数
 //为canvas绘图引入画圆角矩形的方法
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) 
 {
@@ -12,6 +13,19 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r)
 	// this.arcTo(x+r, y);
 	this.closePath();
 	return this;
+}
+function drawCircle(ctx, x, y, r)
+{
+    //开始一个新的绘制路径
+    ctx.beginPath();
+    ctx.fillStyle = "white";
+    var circle = {
+        x : x,    //圆心的x轴坐标值
+        y : y,    //圆心的y轴坐标值
+        r : r      //圆的半径
+    };
+    ctx.arc(circle.x, circle.y, circle.r, 0,Math.PI * 2, false);    
+    ctx.fill();
 }
 //绘制星星，参数中需要有context画笔
 function drawStar(cxt, x, y, r, R, rot)
@@ -31,4 +45,30 @@ function drawStar(cxt, x, y, r, R, rot)
 
     cxt.fill();
     cxt.stroke();
+}
+//重绘九宫格地图
+function drawMap()
+{
+    mapContext.strokeStyle = "#ffffff";
+    mapContext.lineWidth = 1;
+    mapContext.roundRect(disX,disY,disWidth,disHeight,disR).stroke();
+    var xArray = [];
+    xArray.push(disWidth / 3);
+    xArray.push(disWidth * 2 / 3);
+    var yArray = [];
+    yArray.push(disHeight / 3);
+    yArray.push(disHeight * 2 / 3);
+    for(let i = 0; i < 2; i++)
+    {
+        mapContext.moveTo(xArray[i], 0);
+        mapContext.lineTo(xArray[i], disHeight);
+        mapContext.lineWidth = 1;
+        mapContext.strokeStyle = "#FFFFFF";
+        mapContext.stroke();
+        mapContext.moveTo(0, yArray[i]);
+        mapContext.lineTo(disWidth, yArray[i]);
+        mapContext.lineWidth = 1;
+        mapContext.strokeStyle = "#FFFFFF";
+        mapContext.stroke();
+    }
 }
