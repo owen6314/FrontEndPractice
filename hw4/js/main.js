@@ -2,16 +2,22 @@ var BGCanvas;
 var BGContext;
 var mapCanvas;
 var mapContext;
-var disWidth, disHeight, disX,disY,disR;
+//九宫格的相关参数
+var disWidth, disHeight, disX, disY, disR;
+
 //格子中心所在位置的数组
 var centerArray_x = [];
 var centerArray_y = [];
 var diffframetime,lastframetime;
 var whiteBall,star;
-var score; //分数
+var score; 
+//记录按键操作
 var keysDown = {};
+var bgMusic,getStarSound,nextLevelSound;
 
 window.smove = {};
+
+
 smove.startGame = function()
 {
 	smove.init();
@@ -24,6 +30,8 @@ smove.init = function()
 	BGContext = BGCanvas.getContext("2d");
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
+	//播放与加载音乐
+	smove.loadSounds();
 	//绘制背景
 	var BGWid, BGHei;
 	BGWid = BGCanvas.width;
@@ -37,8 +45,14 @@ smove.init = function()
 
 	//分数、历史最高分数
 	score = 0;
+	BGContext.font="5px Times New Roman";
+	BGContext.fillStyle = "white";
+	BGContext.fillText("BEST:",20,130);
+	BGContext.font = "20px Microsoft YaHei";
+	BGContext.fillText(score, 20,20);
 	//背景中星星
-	//以下为mapCanvas绘制
+
+	//mapCanvas绘制
 	//绘制圆角矩形游戏区域
 	disWidth = mapCanvas.width;
 	disHeight = mapCanvas.height;
@@ -62,6 +76,18 @@ smove.init = function()
 	star.init();
 	star.drawStar();
 }
+smove.loadSounds = function()
+{
+	bgMusic = new Audio();
+	bgMusic.src = 'sound/bg.mp3';
+	bgMusic.play();
+	getStarSound = new Audio();
+	getStarSound.src = 'sound/get.wav';
+	getStarSound.load();
+	nextLevelSound = new Audio();
+	nextLevelSound.src = 'sound/next.wav';
+	nextLevelSound.load();
+}
 smove.loop = function()
 {
 	requestAnimationFrame(smove.loop);
@@ -82,6 +108,16 @@ smove.loop = function()
 smove.getStar = function()
 {
 	score++;
+	if(score % 10 !== 0)
+	{
+		getStarSound.currentTime = 0;
+		getStarSound.play();
+	}
+	else
+	{
+		nextLevelSound.currentTime = 0;
+		nextLevelSound.play();
+	}
 	star.reborn();
 }
 
@@ -97,6 +133,7 @@ var whiteBallObject = function()
 	this.y;
 	this.speed; //白球的运动速度
 	this.isNormal; //按键表现是否正常
+	this.color;
 }
 whiteBallObject.prototype.init = function()
 {
@@ -106,10 +143,11 @@ whiteBallObject.prototype.init = function()
 	this.y = centerArray_y[this.row];
 	this.speed = 100;
 	this.isNormal = true;
+	this.color = "white";
 }
 whiteBallObject.prototype.drawWhiteBall = function()
 {
-	drawCircle(mapContext,this.x,this.y,this.r);
+	drawCircle(mapContext,this.x,this.y,this.r,this.color);
 }
 whiteBallObject.prototype.updateWhiteBall = function()
 {
@@ -295,7 +333,18 @@ starObject.prototype.drawStar = function()
 {
 	drawFilledStar(mapContext,centerArray_y[this.column],centerArray_x[this.row],10,20,this.rot,this.color);
 }
-
+//黑色球类型
+var blackBallObject = function()
+{
+	this.num;
+	this.x = [];
+	this.y = [];
+	this.r = 50;
+	this.speed = [];
+	this.type = []; //黑球的运动方向：1：左->右 2:右->左 3:上->下 4:下->上
+	this.row = [];
+	this.column = [];
+}
 
 //键盘输入
 addEventListener("keydown", function (e) 
@@ -306,6 +355,5 @@ addEventListener("keydown", function (e)
 	delete keysDown[40];
     keysDown[e.keyCode] = true;
 }, false);
-
 
 smove.startGame();

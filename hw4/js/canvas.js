@@ -14,18 +14,18 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r)
 	this.closePath();
 	return this;
 }
-function drawCircle(ctx, x, y, r)
+//绘制实心圆
+function drawCircle(cxt,x, y, r,color)
 {
-    //开始一个新的绘制路径
-    ctx.beginPath();
-    ctx.fillStyle = "white";
+    cxt.beginPath();
+    cxt.fillStyle = color;
     var circle = {
-        x : x,    //圆心的x轴坐标值
-        y : y,    //圆心的y轴坐标值
-        r : r      //圆的半径
+        x : x, 
+        y : y,    
+        r : r      
     };
-    ctx.arc(circle.x, circle.y, circle.r, 0,Math.PI * 2, false);    
-    ctx.fill();
+    cxt.arc(circle.x, circle.y, circle.r, 0,Math.PI * 2, false);    
+    cxt.fill();
 }
 //绘制星星，参数中需要有context画笔
 function drawFilledStar(cxt, x, y, r, R,rot,color)
