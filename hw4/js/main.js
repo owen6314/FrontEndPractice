@@ -1,22 +1,25 @@
-var BGCanvas;
-var BGContext;
-var mapCanvas;
-var mapContext;
-//九宫格的相关参数
+var BGCanvas,BGContext;
+var mapCanvas,mapContext;
+var scoreCanvas,scoreContext;
+//背景
+var BGGraident;
+//背景与九宫格的相关参数
+var BGWidth, BGHeight;
 var disWidth, disHeight, disX, disY, disR;
 
 //格子中心所在位置的数组
 var centerArray_x = [];
 var centerArray_y = [];
 var diffframetime,lastframetime;
-var whiteBall,star;
-var score; 
+var whiteBall,star,blackBalls;
+var score,bestScore = 0; 
+var level = 1;
 //记录按键操作
 var keysDown = {};
 var bgMusic,getStarSound,nextLevelSound;
-
+//计时器,用于产生黑球
+var timeRecorder;
 window.smove = {};
-
 
 smove.startGame = function()
 {
@@ -30,26 +33,27 @@ smove.init = function()
 	BGContext = BGCanvas.getContext("2d");
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
+	scoreCanvas = document.getElementById("score");
+	scoreContext = scoreCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
 	//绘制背景
-	var BGWid, BGHei;
-	BGWid = BGCanvas.width;
-	BGHei = BGCanvas.height;
-	var bg = BGContext.createLinearGradient(0,0,BGWid,BGHei);
-	bg.addColorStop(0,"#0000ff");
-	bg.addColorStop(1,"#303030");
-	BGContext.fillStyle = bg;
-	BGContext.rect(0,0,BGWid,BGHei);
-	BGContext.fill();
 
+	BGWidth = BGCanvas.width;
+	BGHeight = BGCanvas.height;
+	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+	//BGGradient.addColorStop(0,"#0000ff");
+	//BGGradient.addColorStop(1,"#303030");
+	BGContext.fillStyle = "black";
+	BGContext.rect(0,0,BGWidth,BGHeight);
+	BGContext.fill();
 	//分数、历史最高分数
 	score = 0;
-	BGContext.font="5px Times New Roman";
-	BGContext.fillStyle = "white";
-	BGContext.fillText("BEST:",20,130);
-	BGContext.font = "20px Microsoft YaHei";
-	BGContext.fillText(score, 20,20);
+	scoreContext.font="30px Courier New";
+	scoreContext.fillStyle = "white";
+	scoreContext.fillText("BEST:" + bestScore,20,110);
+	scoreContext.font = "60px Microsoft YaHei";
+	scoreContext.fillText(score,130,60);
 	//背景中星星
 
 	//mapCanvas绘制
@@ -71,10 +75,18 @@ smove.init = function()
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
 	whiteBall.drawWhiteBall();
-	//绘制奖励的星星
+	//绘制星星
 	star = new starObject();
 	star.init();
 	star.drawStar();
+	//绘制黑球
+	blackBalls = new blackBallObject();
+	blackBalls.init();
+
+
+
+	//计时器
+	timeRecorder = Date.now();
 }
 smove.loadSounds = function()
 {
@@ -94,6 +106,7 @@ smove.loop = function()
 	var now = Date.now();    //1970 00:00:00 到现在的毫秒数
 	diffframetime = now - lastframetime;
 	lastframetime = now;
+	//重新绘制地图
 	mapContext.clearRect(0,0,disWidth,disHeight);
 	drawMap();
 	whiteBall.updateWhiteBall();
@@ -104,6 +117,18 @@ smove.loop = function()
 	}
 	star.rotate();
 	star.drawStar();
+	//重绘背景与黑球
+	BGContext.clearRect(0,0,BGWidth,BGHeight);
+	BGContext.fillStyle = "black";
+	BGContext.rect(0,0,BGWidth,BGHeight);
+	BGContext.fill();
+
+	smove.generateBlackBall();
+	blackBalls.updateBlackBall();
+	blackBalls.drawBlackBall();
+	//重绘分数的时候可以使用局部重绘的方式
+	scoreContext.clearRect(0,0,220,200);
+	drawScore();
 }
 smove.getStar = function()
 {
@@ -120,7 +145,19 @@ smove.getStar = function()
 	}
 	star.reborn();
 }
-
+smove.generateBlackBall = function()
+{
+	switch(level)
+	{
+		case 1:
+			if(Date.now() - timeRecorder >= 3000)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
+	}
+}
 //各种物体类
 //小球的row和column都是按照0，1，2进行编排的
 var whiteBallObject = function()
@@ -336,7 +373,7 @@ starObject.prototype.drawStar = function()
 //黑色球类型
 var blackBallObject = function()
 {
-	this.num;
+	this.num = 10;
 	this.x = [];
 	this.y = [];
 	this.r = 50;
@@ -344,6 +381,88 @@ var blackBallObject = function()
 	this.type = []; //黑球的运动方向：1：左->右 2:右->左 3:上->下 4:下->上
 	this.row = [];
 	this.column = [];
+	this.isAlive = []; //是否存在于界面，只有存在于界面中的黑球才会被绘制
+	this.color = "red";
+}
+blackBallObject.prototype.init = function()
+{
+	for(let i = 0; i < this.num; i++)
+	{
+		this.isAlive[i] = false;
+	}
+}
+blackBallObject.prototype.born = function()
+{
+	if(level === 1)
+	{
+		for(let i = 0; i < this.num; i++)
+		{
+			if(!this.isAlive[i])
+			{
+				this.isAlive[i] = true;
+				this.speed[i] = 5;
+				this.type[i] = Math.floor(Math.random() * 4) + 1;
+				this.column[i] = Math.floor(Math.random() * 3);
+				this.row[i] = Math.floor(Math.random() * 3);
+				switch(this.type[i])
+				{
+					case 1:
+						this.x[i] = 0;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 2:
+						this.x[i] = BGWidth;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 3:
+						this.x[i] = centerArray_x[this.column];
+						this.y[i] = 0;
+						break;
+					case 4:
+						this.x[i] = centerArray_x[this.column];
+						this.y[i] = BGHeight;
+						break;
+				}
+				break;
+			}
+		}
+	}
+}
+//更新位置，将离开屏幕区域的黑球设定为死亡
+blackBallObject.prototype.updateBlackBall = function()
+{
+	for(let i = 0; i < this.num;i++)
+	{
+		if(this.isAlive[i])
+		{
+			switch(this.type[i])
+			{
+				case 1:
+					this.x[i] += this.speed[i];
+					break;
+				case 2:
+					this.x[i] -= this.speed[i];
+					break;
+				case 3:
+					this.y[i] += this.speed[i];
+					break;
+				case 4:
+					this.y[i] -= this.speed[i];
+					break		
+			}
+			//死亡
+		}
+	}
+}
+blackBallObject.prototype.drawBlackBall = function()
+{
+	for(let i = 0; i < this.num; i++)
+	{
+		if(this.isAlive[i])
+		{
+			drawCircle(BGContext,this.x[i],this.y[i],this.r,this.color);
+		}
+	}
 }
 
 //键盘输入

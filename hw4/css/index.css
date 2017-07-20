@@ -22,6 +22,10 @@ div#main
 
     text-align: center;
 }
+div#game
+{
+    position: absolute;
+}
 #outer
 {
     position: absolute;
@@ -40,11 +44,14 @@ div#map
     left: 0;
 
     width: 300px;
-    height: 300px;
+    height: 400px;
     margin: auto;
 }
 #inner
 {
     display: block;
-
+}
+#score
+{
+    display: block;
 }

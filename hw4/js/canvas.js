@@ -70,3 +70,12 @@ function drawMap()
         mapContext.stroke();
     }
 }
+//重绘分数
+function drawScore()
+{
+    scoreContext.font="30px Courier New";
+    scoreContext.fillStyle = "white";
+    scoreContext.fillText("BEST:" + bestScore,20,110);
+    scoreContext.font = "60px Microsoft YaHei";
+    scoreContext.fillText(score,130,60);
+}
