@@ -1,13 +1,13 @@
 var BGCanvas,BGContext;
 var mapCanvas,mapContext;
-var scoreCanvas,scoreContext;
 //背景
 var BGGraident;
 //背景与九宫格的相关参数
 var BGWidth, BGHeight;
+var mapWidth, mapHeight;
 var disWidth, disHeight, disX, disY, disR;
 
-//格子中心所在位置的数组
+//格子中心所在位置的数组(相对mapCanvas而言)
 var centerArray_x = [];
 var centerArray_y = [];
 var diffframetime,lastframetime;
@@ -19,6 +19,9 @@ var keysDown = {};
 var bgMusic,getStarSound,nextLevelSound;
 //计时器,用于产生黑球
 var timeRecorder;
+
+//是否暂停
+var isStopped;
 window.smove = {};
 
 smove.startGame = function()
@@ -33,44 +36,45 @@ smove.init = function()
 	BGContext = BGCanvas.getContext("2d");
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
-	scoreCanvas = document.getElementById("score");
-	scoreContext = scoreCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
-	//绘制背景
-
+	//绘制背景与地图
 	BGWidth = BGCanvas.width;
 	BGHeight = BGCanvas.height;
+	mapWidth = mapCanvas.width;
+	mapHeight = mapCanvas.height;
 	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
 	//BGGradient.addColorStop(0,"#0000ff");
 	//BGGradient.addColorStop(1,"#303030");
-	BGContext.fillStyle = "black";
+	BGContext.fillStyle = "red";
 	BGContext.rect(0,0,BGWidth,BGHeight);
 	BGContext.fill();
-	//分数、历史最高分数
-	score = 0;
-	scoreContext.font="30px Courier New";
-	scoreContext.fillStyle = "white";
-	scoreContext.fillText("BEST:" + bestScore,20,110);
-	scoreContext.font = "60px Microsoft YaHei";
-	scoreContext.fillText(score,130,60);
 	//背景中星星
 
-	//mapCanvas绘制
-	//绘制圆角矩形游戏区域
-	disWidth = mapCanvas.width;
-	disHeight = mapCanvas.height;
-	disX = 0;
-	disY = disX;
+	//以下为使用mapContext
+	mapContext.fillStyle = "black";
+	mapContext.rect(0,0,mapWidth, mapHeight);
+	mapContext.fill();
+	//绘制地图
+	disWidth = mapCanvas.width / 2;
+	disHeight = mapCanvas.height / 2;
+	disX = disWidth / 2;
+	disY = disHeight / 2;
 	disR = 40;
 	drawMap();
 	//球心和方块中心所在数组
-	centerArray_x.push(disWidth / 6);
-	centerArray_x.push(disWidth / 2);
-	centerArray_x.push(disWidth * 5 / 6);
-	centerArray_y.push(disHeight / 6);
-	centerArray_y.push(disHeight / 2);
-	centerArray_y.push(disHeight * 5 / 6);
+	centerArray_x.push(disWidth / 6 + disX);
+	centerArray_x.push(disWidth / 2 + disX);
+	centerArray_x.push(disWidth * 5 / 6 + disX);
+	centerArray_y.push(disHeight / 6 + disY);
+	centerArray_y.push(disHeight / 2 + disY);
+	centerArray_y.push(disHeight * 5 / 6 + disY);
+	//分数、历史最高分数(用mapCanvas绘制)
+	score = 0;
+	drawScore();
+
+	//isStopped用于暂停的处理（目前还有问题）
+	isStopped = false;
 	//绘制白色小球，小球初始位置在中间格
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
@@ -83,9 +87,7 @@ smove.init = function()
 	blackBalls = new blackBallObject();
 	blackBalls.init();
 
-
-
-	//计时器
+	//计时器,levelup的时候要重新计时
 	timeRecorder = Date.now();
 }
 smove.loadSounds = function()
@@ -102,33 +104,37 @@ smove.loadSounds = function()
 }
 smove.loop = function()
 {
-	requestAnimationFrame(smove.loop);
-	var now = Date.now();    //1970 00:00:00 到现在的毫秒数
-	diffframetime = now - lastframetime;
-	lastframetime = now;
-	//重新绘制地图
-	mapContext.clearRect(0,0,disWidth,disHeight);
-	drawMap();
-	whiteBall.updateWhiteBall();
-	whiteBall.drawWhiteBall();
-	if(whiteBall.column === star.column && whiteBall.row === star.row)
+	if(!isStopped)
 	{
-		smove.getStar();
+		requestAnimationFrame(smove.loop);
+		var now = Date.now();    //1970 00:00:00 到现在的毫秒数
+		diffframetime = now - lastframetime;
+		lastframetime = now;
+		//重新绘制地图
+		mapContext.clearRect(0,0,mapWidth,mapHeight);
+		drawMap();
+		drawScore();
+		whiteBall.updateWhiteBall();
+		whiteBall.drawWhiteBall();
+		if(whiteBall.column === star.column && whiteBall.row === star.row)
+		{
+			smove.getStar();
+		}
+		star.rotate();
+		star.drawStar();
+		//循环中更新黑球
+		smove.generateBlackBall();
+		blackBalls.updateBlackBall();
+		blackBalls.drawBlackBall();
+		if(smove.isCaught())
+		{
+			smove.gameOver();
+		}
+		if(score > 0 && score % 20 === 0)
+		{
+			smove.levelUp();
+		}
 	}
-	star.rotate();
-	star.drawStar();
-	//重绘背景与黑球
-	BGContext.clearRect(0,0,BGWidth,BGHeight);
-	BGContext.fillStyle = "black";
-	BGContext.rect(0,0,BGWidth,BGHeight);
-	BGContext.fill();
-
-	smove.generateBlackBall();
-	blackBalls.updateBlackBall();
-	blackBalls.drawBlackBall();
-	//重绘分数的时候可以使用局部重绘的方式
-	scoreContext.clearRect(0,0,220,200);
-	drawScore();
 }
 smove.getStar = function()
 {
@@ -156,7 +162,39 @@ smove.generateBlackBall = function()
 				blackBalls.born();
 			}
 			break;
+		case 2:
+			if(Date.now() - timeRecorder >= 1500)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
 	}
+}
+//判定白球与黑球是否相撞
+smove.isCaught = function()
+{
+	for(let i = 0; i < blackBalls.num; i++)
+	{
+		if(blackBalls.isAlive[i])
+		{
+			if(Math.abs(blackBalls.x[i] - whiteBall.x) <= blackBalls.r + whiteBall.r && blackBalls.y[i] === whiteBall.y || Math.abs(blackBalls.y[i] - whiteBall.y) <= blackBalls.r + whiteBall.r && blackBalls.x[i] === whiteBall.x)
+				return true;
+		}
+	}
+	return false;
+}
+smove.levelUp = function()
+{
+	if(level === 1)
+	{
+		timeRecorder = Date.now();
+		level++;
+	}
+}
+smove.gameOver = function()
+{
+	isStopped = true;
 }
 //各种物体类
 //小球的row和column都是按照0，1，2进行编排的
@@ -393,14 +431,14 @@ blackBallObject.prototype.init = function()
 }
 blackBallObject.prototype.born = function()
 {
-	if(level === 1)
+	if(level === 1 || level === 2)
 	{
 		for(let i = 0; i < this.num; i++)
 		{
 			if(!this.isAlive[i])
 			{
 				this.isAlive[i] = true;
-				this.speed[i] = 5;
+				this.speed[i] = 4;
 				this.type[i] = Math.floor(Math.random() * 4) + 1;
 				this.column[i] = Math.floor(Math.random() * 3);
 				this.row[i] = Math.floor(Math.random() * 3);
@@ -411,27 +449,28 @@ blackBallObject.prototype.born = function()
 						this.y[i] = centerArray_y[this.row[i]];
 						break;
 					case 2:
-						this.x[i] = BGWidth;
+						this.x[i] = mapWidth;
 						this.y[i] = centerArray_y[this.row[i]];
 						break;
 					case 3:
-						this.x[i] = centerArray_x[this.column];
+						this.x[i] = centerArray_x[this.column[i]];
 						this.y[i] = 0;
 						break;
 					case 4:
-						this.x[i] = centerArray_x[this.column];
-						this.y[i] = BGHeight;
+						this.x[i] = centerArray_x[this.column[i]];
+						this.y[i] = mapHeight;
 						break;
 				}
 				break;
 			}
 		}
 	}
+
 }
 //更新位置，将离开屏幕区域的黑球设定为死亡
 blackBallObject.prototype.updateBlackBall = function()
 {
-	for(let i = 0; i < this.num;i++)
+	for(let i = 0; i < this.num; i++)
 	{
 		if(this.isAlive[i])
 		{
@@ -450,7 +489,11 @@ blackBallObject.prototype.updateBlackBall = function()
 					this.y[i] -= this.speed[i];
 					break		
 			}
-			//死亡
+			//黑球离开屏幕范围
+			if(this.x[i] < 0 || this.x[i] > mapWidth || this.y[i] < 0 || this.y[i] > mapHeight)
+			{
+				this.isAlive[i] = false;
+			}
 		}
 	}
 }
@@ -460,7 +503,7 @@ blackBallObject.prototype.drawBlackBall = function()
 	{
 		if(this.isAlive[i])
 		{
-			drawCircle(BGContext,this.x[i],this.y[i],this.r,this.color);
+			drawCircle(mapContext,this.x[i],this.y[i],this.r,this.color);
 		}
 	}
 }

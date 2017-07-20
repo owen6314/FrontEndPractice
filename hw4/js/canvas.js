@@ -47,24 +47,27 @@ function drawFilledStar(cxt, x, y, r, R,rot,color)
 //重绘九宫格地图
 function drawMap()
 {
+	mapContext.fillStyle = "black";
+	mapContext.rect(0,0,mapWidth, mapHeight);
+	mapContext.fill();
     mapContext.strokeStyle = "#ffffff";
     mapContext.lineWidth = 1;
     mapContext.roundRect(disX,disY,disWidth,disHeight,disR).stroke();
     var xArray = [];
-    xArray.push(disWidth / 3);
-    xArray.push(disWidth * 2 / 3);
+    xArray.push(disWidth / 3 + disX);
+    xArray.push(disWidth * 2 / 3 + disX);
     var yArray = [];
-    yArray.push(disHeight / 3);
-    yArray.push(disHeight * 2 / 3);
+    yArray.push(disHeight / 3 + disY);
+    yArray.push(disHeight * 2 / 3 + disY);
     for(let i = 0; i < 2; i++)
     {
-        mapContext.moveTo(xArray[i], 0);
-        mapContext.lineTo(xArray[i], disHeight);
+        mapContext.moveTo(xArray[i], disY);
+        mapContext.lineTo(xArray[i], disHeight + disY);
         mapContext.lineWidth = 1;
         mapContext.strokeStyle = "#FFFFFF";
         mapContext.stroke();
-        mapContext.moveTo(0, yArray[i]);
-        mapContext.lineTo(disWidth, yArray[i]);
+        mapContext.moveTo(disX, yArray[i]);
+        mapContext.lineTo(disWidth + disX, yArray[i]);
         mapContext.lineWidth = 1;
         mapContext.strokeStyle = "#FFFFFF";
         mapContext.stroke();
@@ -73,9 +76,9 @@ function drawMap()
 //重绘分数
 function drawScore()
 {
-    scoreContext.font="30px Courier New";
-    scoreContext.fillStyle = "white";
-    scoreContext.fillText("BEST:" + bestScore,20,110);
-    scoreContext.font = "60px Microsoft YaHei";
-    scoreContext.fillText(score,130,60);
+	mapContext.font="30px Courier New";
+	mapContext.fillStyle = "white";
+	mapContext.fillText("BEST:" + bestScore,mapWidth / 2,disY / 2 + 50);
+	mapContext.font = "60px Microsoft YaHei";
+	mapContext.fillText(score,mapWidth / 2,disY / 2);
 }
