@@ -43,6 +43,8 @@ smove.init = function()
 	BGHeight = BGCanvas.height;
 	mapWidth = mapCanvas.width;
 	mapHeight = mapCanvas.height;
+	BGContext.clearRect(0,0,BGWidth,BGHeight);
+	mapContext.clearRect(0,0,mapWidth,mapHeight);
 	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
 	//BGGradient.addColorStop(0,"#0000ff");
 	//BGGradient.addColorStop(1,"#303030");
@@ -71,6 +73,12 @@ smove.init = function()
 	centerArray_y.push(disHeight * 5 / 6 + disY);
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
+	if(document.cookie.length > 0)
+	{
+		console.info(">0");
+		let n = document.cookie.indexOf("=");
+		bestScore = unescape(document.cookie.substring(n + 1));
+	}
 	drawScore();
 
 	//isStopped用于暂停的处理（目前还有问题）
@@ -192,8 +200,19 @@ smove.levelUp = function()
 		level++;
 	}
 }
+//在gameOver函数中更改cookie
 smove.gameOver = function()
 {
+	console.info("!");
+	var oldScore = bestScore;
+	if(oldScore < score)
+	{
+		oldScore = score;
+	}
+	console.info(oldScore);
+	document.cookie = "best=" + escape(oldScore);
+	console.info(document.cookie);
+	bgMusic.src = "";
 	isStopped = true;
 }
 //各种物体类
@@ -508,13 +527,17 @@ blackBallObject.prototype.drawBlackBall = function()
 	}
 }
 
-//键盘输入
+//键盘输入，空格的keyCode是32，
 addEventListener("keydown", function (e) 
 {
 	delete keysDown[37];
 	delete keysDown[38];
 	delete keysDown[39];
 	delete keysDown[40];
+	if(e.keyCode === 13 && isStopped === true)
+	{
+		smove.startGame();
+	}
     keysDown[e.keyCode] = true;
 }, false);
 
