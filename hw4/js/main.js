@@ -5,8 +5,9 @@ var BGGraident;
 //背景与九宫格的相关参数
 var BGWidth, BGHeight;
 var mapWidth, mapHeight;
-var disWidth, disHeight, disX, disY, disR;
+var oldmapWidth;
 
+var disWidth, disHeight, disX, disY, disR;
 //格子中心所在位置的数组(相对mapCanvas而言)
 var centerArray_x = [];
 var centerArray_y = [];
@@ -22,6 +23,9 @@ var timeRecorder;
 //是否暂停
 var isStopped;
 var isCongratulating;
+//每个格的大小
+var gridSize;
+
 window.smove = {};
 
 smove.startGame = function()
@@ -38,21 +42,11 @@ smove.init = function()
 	mapContext = mapCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
-	//绘制背景与地图
+	//绘制背景
 	BGWidth = BGCanvas.width;
 	BGHeight = BGCanvas.height;
-	mapWidth = mapCanvas.width;
-	mapHeight = mapCanvas.height;
-	if(mapWidth >= mapHeight)
-	{
-		mapWidth = mapHeight;
-	}
-	else
-	{
-		mapHeight = mapWidth;
-	}
-	BGContext.clearRect(0,0,BGWidth,BGHeight);
-	mapContext.clearRect(0,0,mapWidth,mapHeight);
+	//BGContext.clearRect(0,0,BGWidth,BGHeight);
+	//mapContext.clearRect(0,0,mapWidth,mapHeight);
 	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
 	//BGGradient.addColorStop(0,"#ff0000");
 	//BGGradient.addColorStop(1,"#303030");
@@ -61,24 +55,18 @@ smove.init = function()
 	BGContext.fill();
 	//背景中星星
 
-	//以下为使用mapContext
+	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
+	mapWidth = jQuery(window).get(0).innerWidth;
+	mapHeight = jQuery(window).get(0).innerHeight;
+	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
+	mapHeight = mapWidth;
+	oldmapWidth = mapWidth;
+	mapCanvas.width = mapWidth;
+	mapCanvas.height = mapHeight;
 	mapContext.fillStyle = "black";
 	mapContext.rect(0,0,mapWidth, mapHeight);
 	mapContext.fill();
-	//绘制地图
-	disWidth = mapCanvas.width / 2;
-	disHeight = mapCanvas.height / 2;
-	disX = disWidth / 2;
-	disY = disHeight / 2;
-	disR = 40;
 	drawMap();
-	//球心和方块中心所在数组
-	centerArray_x.push(disWidth / 6 + disX);
-	centerArray_x.push(disWidth / 2 + disX);
-	centerArray_x.push(disWidth * 5 / 6 + disX);
-	centerArray_y.push(disHeight / 6 + disY);
-	centerArray_y.push(disHeight / 2 + disY);
-	centerArray_y.push(disHeight * 5 / 6 + disY);
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
 	level = 1;
@@ -125,8 +113,7 @@ smove.loop = function()
 	{
 		requestAnimationFrame(smove.loop);
 		var now = Date.now();    //1970 00:00:00 到现在的毫秒数
-		diffframetime = now - lastframetime;
-		lastframetime = now;
+
 		//重新绘制地图
 		mapContext.clearRect(0,0,mapWidth,mapHeight);
 		drawMap();
@@ -248,7 +235,7 @@ smove.gameOver = function()
 //小球的row和column都是按照0，1，2进行编排的
 var whiteBallObject = function()
 {
-	this.r = 30;
+	this.r;
 	this.row = 0;
 	this.column = 0;
 	//球心坐标
@@ -264,7 +251,8 @@ whiteBallObject.prototype.init = function()
 	this.column = 1;
 	this.x = centerArray_x[this.column];
 	this.y = centerArray_y[this.row];
-	this.speed = 100;
+	this.r = gridSize / 4;
+	this.speed = gridSize;
 	this.isNormal = true;
 	this.color = "white";
 }
@@ -454,15 +442,15 @@ starObject.prototype.reborn = function()
 }
 starObject.prototype.drawStar = function()
 {
-	drawFilledStar(mapContext,centerArray_y[this.column],centerArray_x[this.row],10,20,this.rot,this.color);
+	drawFilledStar(mapContext,centerArray_y[this.column],centerArray_x[this.row],gridSize / 16,gridSize / 8,this.rot,this.color);
 }
 //黑色球类型
 var blackBallObject = function()
 {
-	this.num = 10;
+	this.num = 15;
 	this.x = [];
 	this.y = [];
-	this.r = 40;
+	this.r;
 	this.speed = [];
 	this.type = []; //黑球的运动方向：1：左->右 2:右->左 3:上->下 4:下->上 5:左下-> 6左上-> 7右下-> 8右上->
 	this.row = [];
@@ -472,9 +460,11 @@ var blackBallObject = function()
 }
 blackBallObject.prototype.init = function()
 {
+	this.r = gridSize / 3;
 	for(let i = 0; i < this.num; i++)
 	{
 		this.isAlive[i] = false;
+		this.speed[i] = gridSize / 25;
 	}
 }
 blackBallObject.prototype.born = function()
@@ -486,7 +476,6 @@ blackBallObject.prototype.born = function()
 			if(!this.isAlive[i])
 			{
 				this.isAlive[i] = true;
-				this.speed[i] = 4;
 				this.type[i] = Math.floor(Math.random() * 4) + 1;
 				this.column[i] = Math.floor(Math.random() * 3);
 				this.row[i] = Math.floor(Math.random() * 3);
@@ -521,7 +510,6 @@ blackBallObject.prototype.born = function()
 			if(!this.isAlive[i])
 			{
 				this.isAlive[i] = true;
-				this.speed[i] = 4;
 				this.type[i] = Math.floor(Math.random() * 4) + 1;
 				this.column[i] = Math.floor(Math.random() * 3);
 				this.row[i] = Math.floor(Math.random() * 3);
@@ -617,6 +605,7 @@ addEventListener("keydown", function (e)
 	delete keysDown[38];
 	delete keysDown[39];
 	delete keysDown[40];
+	//回车
 	if(e.keyCode === 13 && isStopped === true)
 	{
 		smove.startGame();

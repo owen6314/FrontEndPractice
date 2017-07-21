@@ -47,6 +47,19 @@ function drawFilledStar(cxt, x, y, r, R,rot,color)
 //重绘九宫格地图
 function drawMap()
 {
+	//根据屏幕大小调整
+	mapWidth = jQuery(window).get(0).innerWidth;
+	mapHeight = jQuery(window).get(0).innerHeight;
+	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
+	mapHeight = mapWidth;
+	mapCanvas.width = mapWidth;
+	mapCanvas.height = mapHeight;
+	disWidth = mapWidth / 2;
+	disHeight = mapHeight / 2;
+	disX = disWidth / 2;
+	disY = disHeight / 2;
+	disR = disWidth / 4;
+
 	mapContext.fillStyle = "black";
 	mapContext.rect(0,0,mapWidth, mapHeight);
 	mapContext.fill();
@@ -59,6 +72,17 @@ function drawMap()
     var yArray = [];
     yArray.push(disHeight / 3 + disY);
     yArray.push(disHeight * 2 / 3 + disY);
+
+    //球心和方块中心所在数组
+    centerArray_x = [];
+    centerArray_y = [];
+	centerArray_x.push(disWidth / 6 + disX);
+	centerArray_x.push(disWidth / 2 + disX);
+	centerArray_x.push(disWidth * 5 / 6 + disX);
+	centerArray_y.push(disHeight / 6 + disY);
+	centerArray_y.push(disHeight / 2 + disY);
+	centerArray_y.push(disHeight * 5 / 6 + disY);
+
     for(let i = 0; i < 2; i++)
     {
         mapContext.moveTo(xArray[i], disY);
@@ -72,26 +96,70 @@ function drawMap()
         mapContext.strokeStyle = "#FFFFFF";
         mapContext.stroke();
     }
+    //更新格子的大小，用于更新白球和黑球大小
+    gridSize = centerArray_x[1] - centerArray_x[0];
+    //如果九宫格大小有更新，则更新白球黑球和星星的位置、大小、速度
+    if(mapWidth !== oldmapWidth)
+    {
+    	responsiveUpdate();
+    	oldmapWidth = mapWidth;
+    }
+}
+
+function responsiveUpdate()
+{
+	whiteBall.r = gridSize / 4;
+	whiteBall.speed = gridSize;
+	whiteBall.x = centerArray_x[whiteBall.column];
+	whiteBall.y = centerArray_y[whiteBall.row];
+
+	blackBalls.r = gridSize / 3;
+	for(let i = 0; i < blackBalls.num; i++)
+	{
+		blackBalls.speed[i] = gridSize / 25;
+		//TODO 黑球另一个坐标位置的等比例变化
+		if(blackBalls.isAlive[i])
+		{
+			switch(blackBalls.type[i])
+			{
+				case 1:
+					blackBalls.y[i] = centerArray_y[blackBalls.row[i]]; 
+					break;
+				case 2:
+					blackBalls.y[i] = centerArray_y[blackBalls.row[i]]; 
+					break;
+				case 3:
+					blackBalls.x[i] = centerArray_x[blackBalls.column[i]];
+					break;
+				case 4:
+					blackBalls.x[i] = centerArray_x[blackBalls.column[i]];
+					break;
+
+			}
+		}
+	}
+
 }
 //重绘分数
 function drawScore()
 {
-	mapContext.font="30px Courier New";
+	let smallFontSize = gridSize / 5;
+	let smallFont = smallFontSize + "px " + "Courier New"
+	mapContext.font= smallFont;
 	mapContext.fillStyle = "white";
-	mapContext.fillText("Level:" + level, mapWidth / 4, disY / 2 + 50);
-	mapContext.fillText("Best:" + bestScore,mapWidth / 2 + 20,disY / 2 + 50);
-	mapContext.font = "60px Microsoft YaHei";
+	mapContext.fillText("Level:" + level, 4 * disX / 3, 4 * disY / 5);
+	mapContext.fillText("Best:" + bestScore, 7 * disX / 3 , 4 * disY / 5);
+	let largeFontSize = gridSize / 2;
+	let largeFont = largeFontSize + "px " + "Microsoft YaHei";
+	mapContext.font = largeFont;
 	mapContext.fillText(score,mapWidth / 2,disY / 2);
 
 }
 
 function drawCongratulating()
 {
-	/*
-	var fontGradient = mapContext.createLinearGradient(0,0);
-	fontGradient.addColorStop(0,"#ff0000");
-	fontGradient.addColorStop(1,"#303030");*/
-	mapContext.font="50px Courier New";
-	mapContext.fillStyle = "purple";
-	mapContext.fillText("Level Up!",mapWidth / 3,mapHeight / 2);
+	let fontSize = gridSize / 5;
+	let font = fontSize + "px " + "Courier New";
+	mapContext.fillStyle = "white";
+	mapContext.fillText("Level Up!",mapWidth / 3, 5 *mapHeight / 6);
 }
