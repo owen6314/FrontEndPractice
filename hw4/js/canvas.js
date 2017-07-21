@@ -78,7 +78,20 @@ function drawScore()
 {
 	mapContext.font="30px Courier New";
 	mapContext.fillStyle = "white";
-	mapContext.fillText("BEST:" + bestScore,mapWidth / 2,disY / 2 + 50);
+	mapContext.fillText("Level:" + level, mapWidth / 4, disY / 2 + 50);
+	mapContext.fillText("Best:" + bestScore,mapWidth / 2 + 20,disY / 2 + 50);
 	mapContext.font = "60px Microsoft YaHei";
 	mapContext.fillText(score,mapWidth / 2,disY / 2);
+
+}
+
+function drawCongratulating()
+{
+	/*
+	var fontGradient = mapContext.createLinearGradient(0,0);
+	fontGradient.addColorStop(0,"#ff0000");
+	fontGradient.addColorStop(1,"#303030");*/
+	mapContext.font="50px Courier New";
+	mapContext.fillStyle = "purple";
+	mapContext.fillText("Level Up!",mapWidth / 3,mapHeight / 2);
 }

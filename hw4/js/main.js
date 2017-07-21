@@ -1,6 +1,6 @@
 var BGCanvas,BGContext;
 var mapCanvas,mapContext;
-//背景
+//渐变背景
 var BGGraident;
 //背景与九宫格的相关参数
 var BGWidth, BGHeight;
@@ -13,15 +13,15 @@ var centerArray_y = [];
 var diffframetime,lastframetime;
 var whiteBall,star,blackBalls;
 var score,bestScore = 0; 
-var level = 1;
+var level;
 //记录按键操作
 var keysDown = {};
 var bgMusic,getStarSound,nextLevelSound;
 //计时器,用于产生黑球
 var timeRecorder;
-
 //是否暂停
 var isStopped;
+var isCongratulating;
 window.smove = {};
 
 smove.startGame = function()
@@ -43,12 +43,20 @@ smove.init = function()
 	BGHeight = BGCanvas.height;
 	mapWidth = mapCanvas.width;
 	mapHeight = mapCanvas.height;
+	if(mapWidth >= mapHeight)
+	{
+		mapWidth = mapHeight;
+	}
+	else
+	{
+		mapHeight = mapWidth;
+	}
 	BGContext.clearRect(0,0,BGWidth,BGHeight);
 	mapContext.clearRect(0,0,mapWidth,mapHeight);
 	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
-	//BGGradient.addColorStop(0,"#0000ff");
+	//BGGradient.addColorStop(0,"#ff0000");
 	//BGGradient.addColorStop(1,"#303030");
-	BGContext.fillStyle = "red";
+	BGContext.fillStyle = "black";
 	BGContext.rect(0,0,BGWidth,BGHeight);
 	BGContext.fill();
 	//背景中星星
@@ -73,16 +81,17 @@ smove.init = function()
 	centerArray_y.push(disHeight * 5 / 6 + disY);
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
+	level = 1;
 	if(document.cookie.length > 0)
 	{
-		console.info(">0");
 		let n = document.cookie.indexOf("=");
 		bestScore = unescape(document.cookie.substring(n + 1));
 	}
 	drawScore();
-
-	//isStopped用于暂停的处理（目前还有问题）
+	//isStopped用于判断游戏结束
 	isStopped = false;
+	isCongratulating = false;
+
 	//绘制白色小球，小球初始位置在中间格
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
@@ -134,11 +143,15 @@ smove.loop = function()
 		smove.generateBlackBall();
 		blackBalls.updateBlackBall();
 		blackBalls.drawBlackBall();
+		if(isCongratulating)
+		{
+			drawCongratulating();
+		}
 		if(smove.isCaught())
 		{
 			smove.gameOver();
 		}
-		if(score > 0 && score % 20 === 0)
+		if(score === 10 && level === 1 || score === 20 && level === 2||score === 30 && level === 3||score === 40 && level === 4)
 		{
 			smove.levelUp();
 		}
@@ -177,6 +190,20 @@ smove.generateBlackBall = function()
 				blackBalls.born();
 			}
 			break;
+		case 3:
+			if(Date.now() - timeRecorder >= 1500)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
+		case 4:
+			if(Date.now() - timeRecorder >= 750)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
 	}
 }
 //判定白球与黑球是否相撞
@@ -194,24 +221,26 @@ smove.isCaught = function()
 }
 smove.levelUp = function()
 {
-	if(level === 1)
+	if(level <= 6)
 	{
 		timeRecorder = Date.now();
 		level++;
 	}
+	isCongratulating = true;
+	var timer = setTimeout("isCongratulating=false",1000);
+	//过关动画
 }
+
 //在gameOver函数中更改cookie
 smove.gameOver = function()
 {
-	console.info("!");
 	var oldScore = bestScore;
 	if(oldScore < score)
 	{
 		oldScore = score;
 	}
-	console.info(oldScore);
 	document.cookie = "best=" + escape(oldScore);
-	console.info(document.cookie);
+	//console.info(document.cookie);
 	bgMusic.src = "";
 	isStopped = true;
 }
@@ -219,7 +248,7 @@ smove.gameOver = function()
 //小球的row和column都是按照0，1，2进行编排的
 var whiteBallObject = function()
 {
-	this.r = 40;
+	this.r = 30;
 	this.row = 0;
 	this.column = 0;
 	//球心坐标
@@ -435,7 +464,7 @@ var blackBallObject = function()
 	this.y = [];
 	this.r = 40;
 	this.speed = [];
-	this.type = []; //黑球的运动方向：1：左->右 2:右->左 3:上->下 4:下->上
+	this.type = []; //黑球的运动方向：1：左->右 2:右->左 3:上->下 4:下->上 5:左下-> 6左上-> 7右下-> 8右上->
 	this.row = [];
 	this.column = [];
 	this.isAlive = []; //是否存在于界面，只有存在于界面中的黑球才会被绘制
@@ -450,7 +479,7 @@ blackBallObject.prototype.init = function()
 }
 blackBallObject.prototype.born = function()
 {
-	if(level === 1 || level === 2)
+	if(level === 1 || level === 2 || level === 4)
 	{
 		for(let i = 0; i < this.num; i++)
 		{
@@ -484,6 +513,44 @@ blackBallObject.prototype.born = function()
 			}
 		}
 	}
+	else if(level === 3)
+	{
+		let num = 0;
+		for(let i = 0; i < this.num; i++)
+		{
+			if(!this.isAlive[i])
+			{
+				this.isAlive[i] = true;
+				this.speed[i] = 4;
+				this.type[i] = Math.floor(Math.random() * 4) + 1;
+				this.column[i] = Math.floor(Math.random() * 3);
+				this.row[i] = Math.floor(Math.random() * 3);
+				switch(this.type[i])
+				{
+					case 1:
+						this.x[i] = 0;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 2:
+						this.x[i] = mapWidth;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 3:
+						this.x[i] = centerArray_x[this.column[i]];
+						this.y[i] = 0;
+						break;
+					case 4:
+						this.x[i] = centerArray_x[this.column[i]];
+						this.y[i] = mapHeight;
+						break;
+				}
+				num++;
+				if(num === 2)
+					break;
+			}
+		}
+	}
+
 
 }
 //更新位置，将离开屏幕区域的黑球设定为死亡
@@ -506,7 +573,23 @@ blackBallObject.prototype.updateBlackBall = function()
 					break;
 				case 4:
 					this.y[i] -= this.speed[i];
-					break		
+					break
+				case 5:
+					this.x[i] += this.speed[i];
+					this.y[i] -= this.speed[i];
+					break;		
+				case 6:
+					this.x[i] += this.speed[i];
+					this.y[i] += this.speed[i];
+					break;		
+				case 7:
+					this.x[i] -= this.speed[i];
+					this.y[i] -= this.speed[i];
+					break;		
+				case 8:
+					this.x[i] -= this.speed[i];
+					this.y[i] += this.speed[i];
+					break;		
 			}
 			//黑球离开屏幕范围
 			if(this.x[i] < 0 || this.x[i] > mapWidth || this.y[i] < 0 || this.y[i] > mapHeight)
