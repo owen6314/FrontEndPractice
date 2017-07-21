@@ -60,7 +60,7 @@ smove.prepare = function()
 	drawMap();
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
-	level = 1;
+	level = 0;
 	if(document.cookie.length > 0)
 	{
 		let n = document.cookie.indexOf("=");
@@ -150,10 +150,9 @@ smove.preAnimation = function()
 
 smove.gameInit = function()
 {
-
 	drawBackground();
 	score = 0;
-	level = 1;
+	level = 0;
 	if(document.cookie.length > 0)
 	{
 		let n = document.cookie.indexOf("=");
@@ -235,7 +234,7 @@ smove.gameLoop = function()
 		{
 			smove.gameOver();
 		}
-		if(score === 10 && level === 1 || score === 20 && level === 2||score === 30 && level === 3||score === 40 && level === 4 || score === 50 && level === 5)
+		if(score === 0 && level === 0 || score === 10 && level === 1 || score === 20 && level === 2||score === 30 && level === 3||score === 40 && level === 4 || score === 50 && level === 5)
 		{
 			smove.levelUp();
 		}
@@ -347,6 +346,11 @@ smove.levelUp = function()
 	var tempGradient; //不同关卡使用不同渐变
 	switch(level)
 	{
+		case 1:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"red");
+			tempGradient.addColorStop(1,"orange");
+			break;
 		case 2:
 			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
 			tempGradient.addColorStop(0,"orange");
