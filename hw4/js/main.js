@@ -1,9 +1,9 @@
 var BGCanvas,BGContext;
-var mapCanvas,mapContext;
-//渐变背景
-var BGGraident,BGImage;
-//背景与游戏画布参数
 var BGWidth, BGHeight;
+var BGGraident;
+var BGImage;
+//背景与游戏画布参数
+var mapCanvas,mapContext;
 var mapWidth, mapHeight;
 var oldmapWidth; //判断浏览器大小是否发生改变
 //九宫格相关参数
@@ -11,8 +11,9 @@ var disWidth, disHeight, disX, disY, disR;
 //格子中心所在位置的数组(相对mapCanvas而言)
 var centerArray_x = [];
 var centerArray_y = [];
-var diffframetime,lastframetime;
+//物体与分数
 var whiteBall,star,blackBalls;
+var whiteBallPart; //游戏结束时的白球碎片
 var score,bestScore = 0; 
 var level;
 //记录按键操作
@@ -21,10 +22,10 @@ var keysDown = {};
 var bgMusic,getStarSound,nextLevelSound;
 //计时器,用于产生黑球
 var timeRecorder;
-
 var isStarted = false;
-var isStopped;
-var isCongratulating
+var isStopped = false;
+var isPaused = false;
+var isCongratulating;
 //每个格的大小
 var gridSize;
 //九宫格到一维数组的映射：row = n / 3 column = n % 3
@@ -34,6 +35,7 @@ var speedX,speedY;
 //移动端支持
 var isMobile;
 var touchStartX, touchStartY;
+
 window.smove = {};
 
 smove.prepare = function()
@@ -43,7 +45,6 @@ smove.prepare = function()
 	BGContext = BGCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
-	//背景
 	drawBackground();
 
 	mapCanvas = document.getElementById("inner");
@@ -149,6 +150,8 @@ smove.preAnimation = function()
 
 smove.gameInit = function()
 {
+
+	drawBackground();
 	score = 0;
 	level = 1;
 	if(document.cookie.length > 0)
@@ -159,6 +162,7 @@ smove.gameInit = function()
 	drawScore();
 	//isStopped用于判断游戏结束
 	isStopped = false;
+	isPaused = false;
 	isCongratulating = false;
 	for(let i = 0; i < 9; i++)
 	{
@@ -171,9 +175,13 @@ smove.gameInit = function()
 	whiteBall.x = centerArray_x[whiteBall.column];
 	whiteBall.y = centerArray_y[whiteBall.row];
 	whiteBall.drawWhiteBall();
+	//重新设置星星
+	star.init();
+	star.drawStar();
 	//绘制黑球
 	blackBalls = new blackBallObject();
 	blackBalls.init();
+	whiteBallPart = new whiteBallPartObject();
 	//计时器,levelup的时候要重新计时
 	timeRecorder = Date.now();
 	smove.gameLoop();
@@ -192,10 +200,9 @@ smove.loadSounds = function()
 }
 smove.gameLoop = function()
 {
-	if(!isStopped)
+	if(!isStopped && !isPaused)
 	{
 		requestAnimationFrame(smove.gameLoop);
-		var now = Date.now();    //1970 00:00:00 到现在的毫秒数
 		//重新绘制地图
 		mapContext.clearRect(0,0,mapWidth,mapHeight);
 		drawMap();
@@ -212,6 +219,7 @@ smove.gameLoop = function()
 		smove.generateBlackBall();
 		blackBalls.updateBlackBall();
 		blackBalls.drawBlackBall();
+		drawTips();
 		for(let i = 0; i < 9; i++)
 		{
 			if(isPlusOne[i])
@@ -227,10 +235,11 @@ smove.gameLoop = function()
 		{
 			smove.gameOver();
 		}
-		if(score === 10 && level === 1 || score === 20 && level === 2||score === 30 && level === 3||score === 40 && level === 4)
+		if(score === 10 && level === 1 || score === 20 && level === 2||score === 30 && level === 3||score === 40 && level === 4 || score === 50 && level === 5)
 		{
 			smove.levelUp();
 		}
+
 	}
 }
 smove.getStar = function()
@@ -251,7 +260,6 @@ smove.getStar = function()
 	//最后一个参数作为函数参数
 	star.reborn();
 	var timer = setTimeout(function(i){isPlusOne[i] = false;},250,starPosNum);
-
 }
 smove.generateBlackBall = function()
 {
@@ -285,6 +293,20 @@ smove.generateBlackBall = function()
 				blackBalls.born();
 			}
 			break;
+		case 5:
+			if(Date.now() - timeRecorder >= 750)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
+		case 6:
+			if(Date.now() - timeRecorder >= 1000)
+			{
+				timeRecorder = Date.now();
+				blackBalls.born();
+			}
+			break;
 	}
 }
 //判定白球与黑球是否相撞
@@ -294,8 +316,19 @@ smove.isCaught = function()
 	{
 		if(blackBalls.isAlive[i])
 		{
-			if(Math.abs(blackBalls.x[i] - whiteBall.x) <= blackBalls.r + whiteBall.r && blackBalls.y[i] === whiteBall.y || Math.abs(blackBalls.y[i] - whiteBall.y) <= blackBalls.r + whiteBall.r && blackBalls.x[i] === whiteBall.x)
-				return true;
+			if(blackBalls.type[i] >= 1 && blackBalls.type[i] <= 4)
+			{
+				if(Math.abs(blackBalls.x[i] - whiteBall.x) <= blackBalls.r + whiteBall.r && blackBalls.y[i] === whiteBall.y || Math.abs(blackBalls.y[i] - whiteBall.y) <= blackBalls.r + whiteBall.r && blackBalls.x[i] === whiteBall.x)
+					return true;
+			}
+			else
+			{
+				let squareX = (blackBalls.x[i] - whiteBall.x) * (blackBalls.x[i] - whiteBall.x);
+				let squareY = (blackBalls.y[i] - whiteBall.y) * (blackBalls.y[i] - whiteBall.y);
+				let squareR = (blackBalls.r + whiteBall.r) * (blackBalls.r + whiteBall.r);
+				if(squareR > squareX + squareY)
+					return true;
+			}
 		}
 	}
 	return false;
@@ -309,12 +342,66 @@ smove.levelUp = function()
 	}
 	isCongratulating = true;
 	var timer = setTimeout("isCongratulating=false",1000);
-	//过关动画
+
+	//过关动画,改变背景颜色
+	var tempGradient; //不同关卡使用不同渐变
+	switch(level)
+	{
+		case 2:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"orange");
+			tempGradient.addColorStop(1,"rgb(128,128,0)");
+			break;
+		case 3:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"yellow");
+			tempGradient.addColorStop(1,"green");
+			break;
+		case 4:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"green");
+			tempGradient.addColorStop(1,"rgb(0,127,255)");
+			break;
+		case 5:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"rgb(0,127,255)");
+			tempGradient.addColorStop(1,"blue");
+			break;
+		case 6:
+			tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+			tempGradient.addColorStop(0,"blue");
+			tempGradient.addColorStop(1,"purple");
+			break;
+	}
+	let widthOnce = BGWidth / 50;
+	let counter = 0;
+	BGContext.fillStyle = tempGradient;
+	var bgChangeTimer = setInterval(function(){
+	//局部渲染
+	BGContext.clearRect(counter * widthOnce, 0, widthOnce, BGHeight);
+	BGContext.fillRect(counter * widthOnce - 10, 0, widthOnce + 10, BGHeight);
+	counter++;
+	if(counter === 50)
+	{
+		clearInterval(bgChangeTimer);
+	}
+	},30);
+	
 }
 
 //在gameOver函数中更改cookie
 smove.gameOver = function()
-{
+{	
+	bgMusic.src = "";
+	isStopped = true;
+	mapContext.clearRect(0,0,mapWidth,mapHeight);
+	drawMap();
+	drawScore();
+	whiteBall.drawWhiteBall();
+	star.drawStar();
+	blackBalls.drawBlackBall();
+	drawTips();
+	//最高分数的处理
 	var oldScore = bestScore;
 	if(oldScore < score)
 	{
@@ -325,10 +412,25 @@ smove.gameOver = function()
 		bestScore = score;
 	}
 	document.cookie = "best=" + escape(oldScore);
-	
-	bgMusic.src = "";
-	isStopped = true;
-	drawTips();
+	whiteBallPart.born();
+	smove.gameOverLoop();
+}
+smove.gameOverLoop = function()
+{
+	if(isStopped)
+	{
+		requestAnimationFrame(smove.gameOverLoop);
+		mapContext.clearRect(0,0,mapWidth,mapHeight);
+		drawMap();
+		drawScore();
+		drawTips();
+		whiteBallPart.updateWhiteBallPart();
+		whiteBallPart.drawWhiteBallPart();
+		star.rotate();
+		star.drawStar();
+		blackBalls.updateBlackBall();
+		blackBalls.drawBlackBall();
+	}
 }
 //各种物体类
 //小球的row和column都是按照0，1，2进行编排的
@@ -342,6 +444,7 @@ var whiteBallObject = function()
 	this.y;
 	this.speed; //白球的运动速度
 	this.isNormal; //按键表现是否正常
+	this.isDead;
 	this.status; //1,2,3,4分别代表在下，右，上，左环绕
 	this.color;
 }
@@ -596,7 +699,7 @@ var blackBallObject = function()
 	this.row = [];
 	this.column = [];
 	this.isAlive = []; //是否存在于界面，只有存在于界面中的黑球才会被绘制
-	this.color = "red";
+	this.color = "#303030";
 }
 blackBallObject.prototype.init = function()
 {
@@ -679,6 +782,90 @@ blackBallObject.prototype.born = function()
 		}
 	}
 
+	else if(level === 5)
+	{
+		for(let i = 0; i < this.num; i++)
+		{
+			if(!this.isAlive[i])
+			{
+				this.isAlive[i] = true;
+				this.type[i] = Math.floor(Math.random() * 4) + 5;
+				switch(this.type[i])
+				{
+					case 5:
+						this.x[i] = 0;
+						this.y[i] = mapHeight;
+						break;
+					case 6:
+						this.x[i] = 0;
+						this.y[i] = 0;
+						break;
+					case 7:
+						this.x[i] = mapWidth;
+						this.y[i] = mapHeight;
+						break;
+					case 8:
+						this.x[i] = mapWidth;
+						this.y[i] = 0;
+						break;
+				}
+			}
+			break;
+		}
+	}
+	else if(level === 6)
+	{
+		let num = 0;
+		for(let i = 0; i < this.num; i++)
+		{
+			if(!this.isAlive[i])
+			{
+				this.isAlive[i] = true;
+				this.type[i] = Math.floor(Math.random() * 8) + 1;
+				this.column[i] = Math.floor(Math.random() * 3);
+				this.row[i] = Math.floor(Math.random() * 3);
+				switch(this.type[i])
+				{
+					case 1:
+						this.x[i] = 0;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 2:
+						this.x[i] = mapWidth;
+						this.y[i] = centerArray_y[this.row[i]];
+						break;
+					case 3:
+						this.x[i] = centerArray_x[this.column[i]];
+						this.y[i] = 0;
+						break;
+					case 4:
+						this.x[i] = centerArray_x[this.column[i]];
+						this.y[i] = mapHeight;
+						break;
+					case 5:
+						this.x[i] = 0;
+						this.y[i] = mapHeight;
+						break;
+					case 6:
+						this.x[i] = 0;
+						this.y[i] = 0;
+						break;
+					case 7:
+						this.x[i] = mapWidth;
+						this.y[i] = mapHeight;
+						break;
+					case 8:
+						this.x[i] = mapWidth;
+						this.y[i] = 0;
+						break;
+				}
+				num++;
+				if(num === 2)
+					break;
+			}
+		}
+	}
+
 
 }
 //更新位置，将离开屏幕区域的黑球设定为死亡
@@ -737,7 +924,89 @@ blackBallObject.prototype.drawBlackBall = function()
 		}
 	}
 }
+//type:0左上，1左下，2右上，3右下
+var whiteBallPartObject = function()
+{
+	this.num = 4;
+	this.r;
+	this.isAlive = [];
+	this.x = [];
+	this.y = [];
+	this.speed = [];
 
+}
+whiteBallPartObject.prototype.born = function()
+{
+	this.r = whiteBall.r;
+	for(let i = 0; i < this.num; i++)
+	{
+		this.isAlive[i] = true;
+		this.x[i] = whiteBall.x;
+		this.y[i] = whiteBall.y;
+		this.speed[i] = gridSize / (i * 10 + 30);
+	}
+
+}
+whiteBallPartObject.prototype.updateWhiteBallPart = function()
+{
+	for(let i = 0; i < this.num; i++)
+	{
+		if(this.isAlive[i])
+		{
+			switch(i)
+			{
+				case 0:
+					this.x[i] -= this.speed[i];
+					this.y[i] -= this.speed[i];
+					break;
+				case 1:
+					this.x[i] -= this.speed[i];
+					this.y[i] += this.speed[i];
+					break;
+				case 2:
+					this.x[i] += this.speed[i];
+					this.y[i] -= this.speed[i];
+					break;
+				case 3:
+					this.x[i] += this.speed[i];
+					this.y[i] += this.speed[i];
+					break;
+			}
+		}
+		//死亡
+		if(this.x[i] < 0 || this.x[i] > mapWidth || this.y[i] < 0 || this.y[i] > mapHeight)
+		{
+			this.isAlive[i] = false;
+		}
+	}
+}
+whiteBallPartObject.prototype.drawWhiteBallPart = function()
+{
+	for(let i = 0; i < this.num; i++)
+	{
+		if(this.isAlive[i])
+		{
+			let deg = Math.PI / 180;
+			switch(i)
+			{
+				//type:0左上，1左下，2右上，3右下
+				case 0:
+					mapContext.sector(this.x[i],this.y[i],this.r, 108 * deg, 216 * deg);
+					break;
+				case 1:
+					mapContext.sector(this.x[i],this.y[i],this.r, 36 * deg, 108 * deg);
+					break;
+				case 2:
+					mapContext.sector(this.x[i],this.y[i],this.r, 216 * deg, 360 * deg);
+					break;
+				case 3:
+					mapContext.sector(this.x[i],this.y[i],this.r, 0, 36 * deg);
+					break;
+			}
+		}
+
+	}
+}
 //键盘输入，空格的keyCode是32，
 addEventListener("keydown", function (e) 
 {
@@ -758,7 +1027,30 @@ addEventListener("keydown", function (e)
 			smove.gameInit();
 		}
 	}
-    keysDown[e.keyCode] = true;
+	//空格键，用于暂停
+	if(e.keyCode === 32)
+	{
+		if(isPaused === true)
+		{
+			isPaused = false;
+			smove.gameLoop();
+		}
+		else
+		{
+			isPaused =true;
+			mapContext.clearRect(0,0,mapWidth,mapHeight);
+			drawMap();
+			drawScore();
+			whiteBall.drawWhiteBall();
+			star.drawStar();
+			blackBalls.drawBlackBall();
+			drawTips();
+		}
+	}
+	if(isPaused === false && isStopped === false)
+	{
+    	keysDown[e.keyCode] = true;
+	}
 }, false);
 //移动端支持，触屏开始
 addEventListener("touchstart", function(e)
@@ -817,7 +1109,7 @@ var browser={
                 android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
                 iPhone: u.indexOf('iPhone') > -1 , //是否为iPhone或者QQHD浏览器
                 iPad: u.indexOf('iPad') > -1, //是否iPad
-                webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+                webApp: u.indexOf('Safari') == -1 
             };  
          }(),  
          language:(navigator.browserLanguage || navigator.language).toLowerCase()  
@@ -826,11 +1118,11 @@ var browser={
 if(browser.versions.mobile || browser.versions.ios || browser.versions.android ||   
     browser.versions.iPhone || browser.versions.iPad)	//移动端
 {
-	console.log('mobile');
+	isMobile = true;
 	smove.prepare();
 }
 else
 {
-  	console.log('pc');
+  	isMobile = false;
 	smove.prepare();
 }
