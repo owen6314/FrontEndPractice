@@ -34,6 +34,8 @@ var speedX,speedY;
 //移动端支持
 var isMobile;
 var touchStartX, touchStartY;
+//移动端防止touchmove多次
+var ableToMove;
 window.smove = {};
 
 smove.prepare = function()
@@ -763,6 +765,10 @@ addEventListener("keydown", function (e)
 //移动端支持，触屏开始
 addEventListener("touchstart", function(e)
 {
+	delete keysDown[37];
+	delete keysDown[38];
+	delete keysDown[39];
+	delete keysDown[40];
 	touchStartX = e.touches[0].pageX;
 	touchStartY = e.touches[0].pageY;
 	if(isStarted === false)
@@ -786,21 +792,33 @@ addEventListener("touchmove", function(e){
 	delete keysDown[38];
 	delete keysDown[39];
 	delete keysDown[40];
-	if(Math.abs(X) > Math.abs(Y) && X > 0)//right
+	if(ableToMove)
 	{
-		keysDown[39] = true;
-	}
-	else if(Math.abs(X) > Math.abs(Y) && X < 0) //left
-	{
-		keysDown[37] = true;
-	}
-	else if(Math.abs(Y) > Math.abs(X) && Y > 0) //bottom
-	{
-		keysDown[40] = true;
-	}
-	else if(Math.abs(Y) > Math.abs(X) && Y < 0) //up
-	{
-		keysDown[38] = true;
+		if(Math.abs(X) > Math.abs(Y) && X > 0)//right
+		{
+			console.info("right");
+			keysDown[39] = true;
+			ableToMove = false;
+			setTimeout(function(){ableToMove = true;},150);
+		}
+		else if(Math.abs(X) > Math.abs(Y) && X < 0) //left
+		{
+			keysDown[37] = true;
+			ableToMove = false;
+			setTimeout(function(){ableToMove = true;},150);
+		}
+		else if(Math.abs(Y) > Math.abs(X) && Y > 0) //bottom
+		{
+			keysDown[40] = true;
+			ableToMove = false;
+			setTimeout(function(){ableToMove = true;},150);
+		}
+		else if(Math.abs(Y) > Math.abs(X) && Y < 0) //up
+		{
+			keysDown[38] = true;
+			ableToMove = false;
+			setTimeout(function(){ableToMove = true;},150);
+		}
 	}
 },false);
 //判断是否为移动端，代码参考https://github.com/5Mi/wumi_blog/issues/48
@@ -826,11 +844,12 @@ var browser={
 if(browser.versions.mobile || browser.versions.ios || browser.versions.android ||   
     browser.versions.iPhone || browser.versions.iPad)	//移动端
 {
-	console.log('mobile');
+	//console.log('mobile');
+	ableToMove = true;
 	smove.prepare();
 }
 else
 {
-  	console.log('pc');
+  	//console.log('pc');
 	smove.prepare();
 }
