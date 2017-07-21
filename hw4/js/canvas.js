@@ -124,7 +124,7 @@ function drawMap()
     	oldmapWidth = mapWidth;
     }
 }
-
+//响应式更新仅在游戏时有效，其他时候无效
 function responsiveUpdate()
 {
 	whiteBall.r = gridSize / 4;

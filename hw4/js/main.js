@@ -6,7 +6,6 @@ var BGGraident,BGImage;
 var BGWidth, BGHeight;
 var mapWidth, mapHeight;
 var oldmapWidth; //判断浏览器大小是否发生改变
-
 //九宫格相关参数
 var disWidth, disHeight, disX, disY, disR;
 //格子中心所在位置的数组(相对mapCanvas而言)
@@ -30,8 +29,11 @@ var isCongratulating
 var gridSize;
 //九宫格到一维数组的映射：row = n / 3 column = n % 3
 var isPlusOne = [];
-//开始界面
+//开始界面动画速度
 var speedX,speedY;
+//移动端支持
+var isMobile;
+var touchStartX, touchStartY;
 window.smove = {};
 
 smove.prepare = function()
@@ -744,7 +746,6 @@ addEventListener("keydown", function (e)
 	delete keysDown[39];
 	delete keysDown[40];
 	//回车
-
 	if(e.keyCode === 13)
 	{
 		if(isStarted === false)
@@ -759,5 +760,77 @@ addEventListener("keydown", function (e)
 	}
     keysDown[e.keyCode] = true;
 }, false);
+//移动端支持，触屏开始
+addEventListener("touchstart", function(e)
+{
+	touchStartX = e.touches[0].pageX;
+	touchStartY = e.touches[0].pageY;
+	if(isStarted === false)
+	{
+		isStarted = true;
+		smove.preAnimation();
+	}
+	else if(isStopped === true)
+	{
+		smove.gameInit();
+	}
 
-smove.prepare();
+},false);
+
+addEventListener("touchmove", function(e){
+	var moveEndX = e.changedTouches[0].pageX;
+	var moveEndY = e.changedTouches[0].pageY;
+	var X = moveEndX - touchStartX;
+	var Y = moveEndY - touchStartY;
+	delete keysDown[37];
+	delete keysDown[38];
+	delete keysDown[39];
+	delete keysDown[40];
+	if(Math.abs(X) > Math.abs(Y) && X > 0)//right
+	{
+		keysDown[39] = true;
+	}
+	else if(Math.abs(X) > Math.abs(Y) && X < 0) //left
+	{
+		keysDown[37] = true;
+	}
+	else if(Math.abs(Y) > Math.abs(X) && Y > 0) //bottom
+	{
+		keysDown[40] = true;
+	}
+	else if(Math.abs(Y) > Math.abs(X) && Y < 0) //up
+	{
+		keysDown[38] = true;
+	}
+},false);
+//判断是否为移动端，代码参考https://github.com/5Mi/wumi_blog/issues/48
+var browser={  
+    versions:function(){   
+           var u = navigator.userAgent, app = navigator.appVersion;   
+           return {//移动终端浏览器版本信息
+                trident: u.indexOf('Trident') > -1, //IE内核
+                presto: u.indexOf('Presto') > -1, //opera内核
+                webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+                mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+                ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+                android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+                iPhone: u.indexOf('iPhone') > -1 , //是否为iPhone或者QQHD浏览器
+                iPad: u.indexOf('iPad') > -1, //是否iPad
+                webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+            };  
+         }(),  
+         language:(navigator.browserLanguage || navigator.language).toLowerCase()  
+}   
+
+if(browser.versions.mobile || browser.versions.ios || browser.versions.android ||   
+    browser.versions.iPhone || browser.versions.iPad)	//移动端
+{
+	console.log('mobile');
+	smove.prepare();
+}
+else
+{
+  	console.log('pc');
+	smove.prepare();
+}
