@@ -163,3 +163,4 @@ function drawCongratulating()
 	mapContext.fillStyle = "white";
 	mapContext.fillText("Level Up!",mapWidth / 3, 5 *mapHeight / 6);
 }
+//获得星星之后的特效

@@ -1,7 +1,7 @@
 var BGCanvas,BGContext;
 var mapCanvas,mapContext;
 //渐变背景
-var BGGraident;
+var BGGraident,BGImage;
 //背景与九宫格的相关参数
 var BGWidth, BGHeight;
 var mapWidth, mapHeight;
@@ -22,7 +22,7 @@ var bgMusic,getStarSound,nextLevelSound;
 var timeRecorder;
 //是否暂停
 var isStopped;
-var isCongratulating;
+var isCongratulating
 //每个格的大小
 var gridSize;
 
@@ -43,14 +43,19 @@ smove.init = function()
 	//播放与加载音乐
 	smove.loadSounds();
 	//绘制背景
+	BGCanvas.width = jQuery(window).get(0).innerWidth;
+	BGCanvas.height = jQuery(window).get(0).innerHeight;
 	BGWidth = BGCanvas.width;
 	BGHeight = BGCanvas.height;
-	//BGContext.clearRect(0,0,BGWidth,BGHeight);
-	//mapContext.clearRect(0,0,mapWidth,mapHeight);
-	//BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
-	//BGGradient.addColorStop(0,"#ff0000");
-	//BGGradient.addColorStop(1,"#303030");
-	BGContext.fillStyle = "black";
+	/*
+	BGImage = new Image();
+	BGImage.src = "img/sky.jpg";
+	BGContext.drawImage(BGImage,0,0,BGWidth,BGHeight);*/
+
+	BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+	BGGradient.addColorStop(0,"#ff0000");
+	BGGradient.addColorStop(1,"#303030");
+	BGContext.fillStyle = BGGradient;
 	BGContext.rect(0,0,BGWidth,BGHeight);
 	BGContext.fill();
 	//背景中星星
@@ -113,7 +118,6 @@ smove.loop = function()
 	{
 		requestAnimationFrame(smove.loop);
 		var now = Date.now();    //1970 00:00:00 到现在的毫秒数
-
 		//重新绘制地图
 		mapContext.clearRect(0,0,mapWidth,mapHeight);
 		drawMap();
@@ -133,6 +137,10 @@ smove.loop = function()
 		if(isCongratulating)
 		{
 			drawCongratulating();
+		}
+		if(isPlusOne)
+		{
+			drawPlusOne();
 		}
 		if(smove.isCaught())
 		{
@@ -157,6 +165,7 @@ smove.getStar = function()
 		nextLevelSound.currentTime = 0;
 		nextLevelSound.play();
 	}
+	var timer = setTimeout("isPlusOne=false",1000);
 	star.reborn();
 }
 smove.generateBlackBall = function()
