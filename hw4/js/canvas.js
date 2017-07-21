@@ -1,4 +1,23 @@
 //绘图函数
+function drawBackground()
+{
+	//绘制背景
+	BGCanvas.width = jQuery(window).get(0).innerWidth;
+	BGCanvas.height = jQuery(window).get(0).innerHeight;
+	BGWidth = BGCanvas.width;
+	BGHeight = BGCanvas.height;
+	/*
+	BGImage = new Image();
+	BGImage.src = "img/sky.jpg";
+	BGContext.drawImage(BGImage,0,0,BGWidth,BGHeight);*/
+	BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+	BGGradient.addColorStop(0,"#101c28");
+	BGGradient.addColorStop(1,"#303030");
+	BGContext.fillStyle = BGGradient;
+	BGContext.rect(0,0,BGWidth,BGHeight);
+	BGContext.fill();
+	//背景中星星
+}
 //为canvas绘图引入画圆角矩形的方法
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) 
 {
@@ -174,4 +193,25 @@ function drawPlusOne(i)
 	mapContext.font = font;
 	mapContext.fillStyle = "blue";
 	mapContext.fillText("+1",whiteBall.x - gridSize/6,whiteBall.y);
+}
+
+//提示文字
+function drawTips()
+{
+	if(isStarted === false)
+	{
+		let smallFontSize = gridSize / 5;
+		let smallFont = smallFontSize + "px " + "Courier New"
+		mapContext.font= smallFont;
+		mapContext.fillStyle = "white";
+		mapContext.fillText("按回车键开始游戏", disX / 3, disY + disHeight + gridSize);
+	}
+	else if(isStopped === true)
+	{
+		let smallFontSize = gridSize / 5;
+		let smallFont = smallFontSize + "px " + "Courier New"
+		mapContext.font= smallFont;
+		mapContext.fillStyle = "white";
+		mapContext.fillText("按回车键重新开始游戏", disX / 3, disY + disHeight + gridSize);
+	}
 }

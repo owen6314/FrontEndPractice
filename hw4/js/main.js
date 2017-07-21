@@ -22,48 +22,30 @@ var keysDown = {};
 var bgMusic,getStarSound,nextLevelSound;
 //计时器,用于产生黑球
 var timeRecorder;
-//是否暂停
+
+var isStarted = false;
 var isStopped;
 var isCongratulating
 //每个格的大小
 var gridSize;
 //九宫格到一维数组的映射：row = n / 3 column = n % 3
 var isPlusOne = [];
+//开始界面
+var speedX,speedY;
 window.smove = {};
 
-smove.startGame = function()
-{
-	smove.init();
-	smove.loop();
-}
-smove.init = function()
+smove.prepare = function()
 {
 	//背景和游戏区域的canvas
 	BGCanvas = document.getElementById("outer");
 	BGContext = BGCanvas.getContext("2d");
-	mapCanvas = document.getElementById("inner");
-	mapContext = mapCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
-	//绘制背景
-	BGCanvas.width = jQuery(window).get(0).innerWidth;
-	BGCanvas.height = jQuery(window).get(0).innerHeight;
-	BGWidth = BGCanvas.width;
-	BGHeight = BGCanvas.height;
-	/*
-	BGImage = new Image();
-	BGImage.src = "img/sky.jpg";
-	BGContext.drawImage(BGImage,0,0,BGWidth,BGHeight);*/
-	
-	
-	BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
-	BGGradient.addColorStop(0,"#101c28");
-	BGGradient.addColorStop(1,"#303030");
-	BGContext.fillStyle = BGGradient;
-	BGContext.rect(0,0,BGWidth,BGHeight);
-	BGContext.fill();
-	//背景中星星
+	//背景
+	drawBackground();
 
+	mapCanvas = document.getElementById("inner");
+	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
 	mapWidth = jQuery(window).get(0).innerWidth;
 	mapHeight = jQuery(window).get(0).innerHeight;
@@ -82,6 +64,97 @@ smove.init = function()
 		bestScore = unescape(document.cookie.substring(n + 1));
 	}
 	drawScore();
+	drawTips();
+	//绘制白色小球，开始游戏后会移动到中间格
+	whiteBall = new whiteBallObject();
+	whiteBall.init();
+	whiteBall.drawWhiteBall();
+	
+	star = new starObject();
+	star.init();
+	star.drawStar();
+	smove.prepareLoop();
+}
+smove.prepareLoop = function()
+{
+	if(!isStarted)
+	{
+		requestAnimationFrame(smove.prepareLoop);
+		mapContext.clearRect(0,0,mapWidth,mapHeight);
+		drawMap();
+		drawScore();
+		drawTips();
+		whiteBall.preUpdateWhiteBall();
+		whiteBall.drawWhiteBall();
+		star.rotate();
+		star.drawStar();
+	}
+}
+smove.startGame = function()
+{
+	isStarted = true;
+	smove.preAnimation();
+	smove.gameInit();
+	smove.gameLoop();
+}
+//白球从当前位置移动到九宫格中心
+smove.preAnimation = function()
+{
+	var distanceX;
+	var distanceY;
+	distanceX = Math.abs(whiteBall.x - centerArray_x[1]);
+	distanceY = Math.abs(whiteBall.y - centerArray_y[1]);
+	speedX = distanceX / 20;
+	speedY = distanceY / 20;
+	var timer = setInterval(function(){
+	if(whiteBall.x > centerArray_x[1])
+	{
+		whiteBall.x -= speedX;
+		if(whiteBall.x <= centerArray_x[1])
+			whiteBall.x = centerArray_x[1];
+	}
+	else if(whiteBall.x < centerArray_x[1])
+	{
+		whiteBall.x += speedX;
+		if(whiteBall.x >= centerArray_x[1])
+			whiteBall.x = centerArray_x[1];
+	}
+	if(whiteBall.y > centerArray_y[1])
+	{
+		whiteBall.y -= speedY;
+		if(whiteBall.y <= centerArray_y[1])
+			whiteBall.y = centerArray_y[1];
+	}
+	else if(whiteBall.y < centerArray_y[1])
+	{
+		whiteBall.y += speedY;
+		if(whiteBall.y >= centerArray_y[1])
+			whiteBall.y = centerArray_y[1];
+	}
+	mapContext.clearRect(0,0,mapWidth,mapHeight);
+	drawMap();
+	drawScore();
+	whiteBall.drawWhiteBall();
+	star.rotate();
+	star.drawStar();
+	if(Math.abs(whiteBall.x - centerArray_x[1]) <= 1 && Math.abs(whiteBall.y - centerArray_y[1]) <= 1)
+	{
+		clearInterval(timer);
+		smove.gameInit();
+	}
+	},25);
+}
+
+smove.gameInit = function()
+{
+	score = 0;
+	level = 1;
+	if(document.cookie.length > 0)
+	{
+		let n = document.cookie.indexOf("=");
+		bestScore = unescape(document.cookie.substring(n + 1));
+	}
+	drawScore();
 	//isStopped用于判断游戏结束
 	isStopped = false;
 	isCongratulating = false;
@@ -89,20 +162,19 @@ smove.init = function()
 	{
 		isPlusOne[i] = false;
 	}
-	//绘制白色小球，小球初始位置在中间格
-	whiteBall = new whiteBallObject();
-	whiteBall.init();
+	//重新设置白球
+	whiteBall.row = 1;
+	whiteBall.column = 1;
+	whiteBall.speed = gridSize;
+	whiteBall.x = centerArray_x[whiteBall.column];
+	whiteBall.y = centerArray_y[whiteBall.row];
 	whiteBall.drawWhiteBall();
-	//绘制星星
-	star = new starObject();
-	star.init();
-	star.drawStar();
 	//绘制黑球
 	blackBalls = new blackBallObject();
 	blackBalls.init();
-
 	//计时器,levelup的时候要重新计时
 	timeRecorder = Date.now();
+	smove.gameLoop();
 }
 smove.loadSounds = function()
 {
@@ -116,11 +188,11 @@ smove.loadSounds = function()
 	nextLevelSound.src = 'sound/next.wav';
 	nextLevelSound.load();
 }
-smove.loop = function()
+smove.gameLoop = function()
 {
 	if(!isStopped)
 	{
-		requestAnimationFrame(smove.loop);
+		requestAnimationFrame(smove.gameLoop);
 		var now = Date.now();    //1970 00:00:00 到现在的毫秒数
 		//重新绘制地图
 		mapContext.clearRect(0,0,mapWidth,mapHeight);
@@ -246,39 +318,85 @@ smove.gameOver = function()
 	{
 		oldScore = score;
 	}
+	if(score > bestScore)
+	{
+		bestScore = score;
+	}
 	document.cookie = "best=" + escape(oldScore);
-	//console.info(document.cookie);
+	
 	bgMusic.src = "";
 	isStopped = true;
+	drawTips();
 }
 //各种物体类
 //小球的row和column都是按照0，1，2进行编排的
 var whiteBallObject = function()
 {
 	this.r;
-	this.row = 0;
-	this.column = 0;
+	this.row;
+	this.column;
 	//球心坐标
 	this.x;
 	this.y;
 	this.speed; //白球的运动速度
 	this.isNormal; //按键表现是否正常
+	this.status; //1,2,3,4分别代表在下，右，上，左环绕
 	this.color;
 }
 whiteBallObject.prototype.init = function()
 {
-	this.row = 1;
+	this.row = -1;
 	this.column = 1;
+	this.status = 1;
 	this.x = centerArray_x[this.column];
-	this.y = centerArray_y[this.row];
+	this.y = disY + disHeight + gridSize / 2;
 	this.r = gridSize / 4;
-	this.speed = gridSize;
+	this.speed = 5;
 	this.isNormal = true;
 	this.color = "white";
 }
+
 whiteBallObject.prototype.drawWhiteBall = function()
 {
 	drawCircle(mapContext,this.x,this.y,this.r,this.color);
+}
+whiteBallObject.prototype.preUpdateWhiteBall = function()
+{
+	switch(this.status)
+	{
+		case 1:
+			this.x += this.speed;
+			if(this.x >= disX + disWidth + gridSize / 2)
+			{
+				this.x = disX + disWidth + gridSize / 2;
+				this.status = 2;
+			}
+			break;
+		case 2:
+			this.y -= this.speed;
+			if(this.y <= disY - gridSize / 2)
+			{
+				this.y = disY - gridSize / 2;
+				this.status = 3;
+			}
+			break;
+		case 3:
+			this.x -= this.speed;
+			if(this.x <= disX - gridSize / 2)
+			{
+				this.x = disX - gridSize / 2;
+				this.status = 4;
+			}
+			break;
+		case 4:
+			this.y += this.speed;
+			if(this.y >= disY + disHeight + gridSize / 2)
+			{
+				this.y = disY + disHeight + gridSize / 2;
+				this.status = 1;
+			}
+			break;
+	}
 }
 whiteBallObject.prototype.updateWhiteBall = function()
 {
@@ -626,11 +744,20 @@ addEventListener("keydown", function (e)
 	delete keysDown[39];
 	delete keysDown[40];
 	//回车
-	if(e.keyCode === 13 && isStopped === true)
+
+	if(e.keyCode === 13)
 	{
-		smove.startGame();
+		if(isStarted === false)
+		{
+			isStarted = true;
+			smove.preAnimation();
+		}
+		else if(isStopped === true)
+		{
+			smove.gameInit();
+		}
 	}
     keysDown[e.keyCode] = true;
 }, false);
 
-smove.startGame();
+smove.prepare();
