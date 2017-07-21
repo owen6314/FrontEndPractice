@@ -2,11 +2,12 @@ var BGCanvas,BGContext;
 var mapCanvas,mapContext;
 //渐变背景
 var BGGraident,BGImage;
-//背景与九宫格的相关参数
+//背景与游戏画布参数
 var BGWidth, BGHeight;
 var mapWidth, mapHeight;
-var oldmapWidth;
+var oldmapWidth; //判断浏览器大小是否发生改变
 
+//九宫格相关参数
 var disWidth, disHeight, disX, disY, disR;
 //格子中心所在位置的数组(相对mapCanvas而言)
 var centerArray_x = [];
@@ -17,6 +18,7 @@ var score,bestScore = 0;
 var level;
 //记录按键操作
 var keysDown = {};
+//音乐
 var bgMusic,getStarSound,nextLevelSound;
 //计时器,用于产生黑球
 var timeRecorder;
@@ -25,7 +27,8 @@ var isStopped;
 var isCongratulating
 //每个格的大小
 var gridSize;
-
+//九宫格到一维数组的映射：row = n / 3 column = n % 3
+var isPlusOne = [];
 window.smove = {};
 
 smove.startGame = function()
@@ -51,9 +54,10 @@ smove.init = function()
 	BGImage = new Image();
 	BGImage.src = "img/sky.jpg";
 	BGContext.drawImage(BGImage,0,0,BGWidth,BGHeight);*/
-
+	
+	
 	BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
-	BGGradient.addColorStop(0,"#ff0000");
+	BGGradient.addColorStop(0,"#101c28");
 	BGGradient.addColorStop(1,"#303030");
 	BGContext.fillStyle = BGGradient;
 	BGContext.rect(0,0,BGWidth,BGHeight);
@@ -68,9 +72,6 @@ smove.init = function()
 	oldmapWidth = mapWidth;
 	mapCanvas.width = mapWidth;
 	mapCanvas.height = mapHeight;
-	mapContext.fillStyle = "black";
-	mapContext.rect(0,0,mapWidth, mapHeight);
-	mapContext.fill();
 	drawMap();
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
@@ -84,7 +85,10 @@ smove.init = function()
 	//isStopped用于判断游戏结束
 	isStopped = false;
 	isCongratulating = false;
-
+	for(let i = 0; i < 9; i++)
+	{
+		isPlusOne[i] = false;
+	}
 	//绘制白色小球，小球初始位置在中间格
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
@@ -134,13 +138,16 @@ smove.loop = function()
 		smove.generateBlackBall();
 		blackBalls.updateBlackBall();
 		blackBalls.drawBlackBall();
+		for(let i = 0; i < 9; i++)
+		{
+			if(isPlusOne[i])
+			{
+				drawPlusOne(i);
+			}
+		}
 		if(isCongratulating)
 		{
 			drawCongratulating();
-		}
-		if(isPlusOne)
-		{
-			drawPlusOne();
 		}
 		if(smove.isCaught())
 		{
@@ -165,8 +172,12 @@ smove.getStar = function()
 		nextLevelSound.currentTime = 0;
 		nextLevelSound.play();
 	}
-	var timer = setTimeout("isPlusOne=false",1000);
+	var starPosNum = star.row * 3 + star.column;
+	isPlusOne[starPosNum] = true;
+	//最后一个参数作为函数参数
 	star.reborn();
+	var timer = setTimeout(function(i){isPlusOne[i] = false;},250,starPosNum);
+
 }
 smove.generateBlackBall = function()
 {

@@ -60,9 +60,9 @@ function drawMap()
 	disY = disHeight / 2;
 	disR = disWidth / 4;
 
-	mapContext.fillStyle = "black";
-	mapContext.rect(0,0,mapWidth, mapHeight);
-	mapContext.fill();
+	//mapContext.fillStyle = "black";
+	//mapContext.rect(0,0,mapWidth, mapHeight);
+	//mapContext.fill();
     mapContext.strokeStyle = "#ffffff";
     mapContext.lineWidth = 1;
     mapContext.roundRect(disX,disY,disWidth,disHeight,disR).stroke();
@@ -158,9 +158,20 @@ function drawScore()
 
 function drawCongratulating()
 {
-	let fontSize = gridSize / 5;
+	let fontSize = gridSize / 2;
 	let font = fontSize + "px " + "Courier New";
+	mapContext.font = font;
 	mapContext.fillStyle = "white";
 	mapContext.fillText("Level Up!",mapWidth / 3, 5 *mapHeight / 6);
 }
 //获得星星之后的特效
+function drawPlusOne(i)
+{
+	let row = Math.floor(i / 3);
+	let column = i % 3;
+	let fontSize = gridSize / 4;
+	let font = fontSize + "px " + "Courier New";
+	mapContext.font = font;
+	mapContext.fillStyle = "blue";
+	mapContext.fillText("+1",whiteBall.x - gridSize/6,whiteBall.y);
+}
