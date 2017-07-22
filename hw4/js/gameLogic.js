@@ -53,15 +53,30 @@ smove.prepare = function()
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
-	//mapWidth = jQuery(window).get(0).innerWidth;
 	mapWidth = window.innerWidth;
-	//mapHeight = jQuery(window).get(0).innerHeight;
 	mapHeight = window.innerHeight;
 	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
 	mapHeight = mapWidth;
 	oldmapWidth = mapWidth;
 	mapCanvas.width = mapWidth;
 	mapCanvas.height = mapHeight;
+	disWidth = mapWidth / 2;
+	disHeight = mapHeight / 2;
+	disX = disWidth / 2;
+	disY = disHeight / 2;
+	disR = disWidth / 4;
+
+    //球心和方块中心所在数组
+    centerArray_x = [];
+    centerArray_y = [];
+	centerArray_x.push(disWidth / 6 + disX);
+	centerArray_x.push(disWidth / 2 + disX);
+	centerArray_x.push(disWidth * 5 / 6 + disX);
+	centerArray_y.push(disHeight / 6 + disY);
+	centerArray_y.push(disHeight / 2 + disY);
+	centerArray_y.push(disHeight * 5 / 6 + disY);
+    //更新格子的大小，用于更新白球和黑球大小
+    gridSize = centerArray_x[1] - centerArray_x[0];
 	drawMap();
 	//分数、历史最高分数(用mapCanvas绘制)
 	score = 0;
@@ -77,11 +92,13 @@ smove.prepare = function()
 	whiteBall = new whiteBallObject();
 	whiteBall.init();
 	whiteBall.drawWhiteBall();
-	
 	star = new starObject();
 	star.init();
 	star.drawStar();
 	smove.prepareLoop();
+	blackBalls = new blackBallObject();
+	whiteBallPart = new whiteBallPartObject();
+
 }
 smove.prepareLoop = function()
 {
@@ -148,7 +165,7 @@ smove.gameInit = function()
 {
 	drawBackground();
 	score = 0;
-	level = 1;
+	level = 0;
 	if(document.cookie.length > 0)
 	{
 		let n = document.cookie.indexOf("=");
@@ -176,9 +193,8 @@ smove.gameInit = function()
 	star.init();
 	star.drawStar();
 	//绘制黑球
-	blackBalls = new blackBallObject();
 	blackBalls.init();
-	whiteBallPart = new whiteBallPartObject();
+
 	//计时器,levelup的时候要重新计时
 	timeRecorder = Date.now();
 	smove.gameLoop();
@@ -583,6 +599,10 @@ addEventListener("touchmove", function(e){
 		}
 	}
 },false);
+window.onresize = function()
+{
+	responsiveUpdate();
+}
 //判断是否为移动端，代码出自https://github.com/5Mi/wumi_blog/issues/48
 var browser={  
     versions:function(){   
