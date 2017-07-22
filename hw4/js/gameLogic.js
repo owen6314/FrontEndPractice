@@ -25,6 +25,7 @@ var timeRecorder;
 var isStarted = false;
 var isStopped = false;
 var isPaused = false;
+var canRestart = false;
 var isCongratulating;
 //每个格的大小
 var gridSize;
@@ -47,13 +48,13 @@ smove.prepare = function()
 	BGContext = BGCanvas.getContext("2d");
 	//播放与加载音乐
 	smove.loadSounds();
+	bgMusic.play();
 	drawBackground();
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
 	//mapWidth = jQuery(window).get(0).innerWidth;
 	mapWidth = window.innerWidth;
-	console.info(mapWidth);
 	//mapHeight = jQuery(window).get(0).innerHeight;
 	mapHeight = window.innerHeight;
 	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
@@ -147,7 +148,7 @@ smove.gameInit = function()
 {
 	drawBackground();
 	score = 0;
-	level = 0;
+	level = 1;
 	if(document.cookie.length > 0)
 	{
 		let n = document.cookie.indexOf("=");
@@ -157,6 +158,7 @@ smove.gameInit = function()
 	//isStopped用于判断游戏结束
 	isStopped = false;
 	isPaused = false;
+	canRestart = false;
 	isCongratulating = false;
 	for(let i = 0; i < 9; i++)
 	{
@@ -165,6 +167,7 @@ smove.gameInit = function()
 	//重新设置白球
 	whiteBall.row = 1;
 	whiteBall.column = 1;
+	whiteBall.isNormal = true;
 	whiteBall.speed = gridSize;
 	whiteBall.x = centerArray_x[whiteBall.column];
 	whiteBall.y = centerArray_y[whiteBall.row];
@@ -184,7 +187,7 @@ smove.loadSounds = function()
 {
 	bgMusic = new Audio();
 	bgMusic.src = 'sound/bg.mp3';
-	bgMusic.play();
+	bgMusic.load();
 	getStarSound = new Audio();
 	getStarSound.src = 'sound/get.wav';
 	getStarSound.load();
@@ -338,18 +341,10 @@ smove.levelUp = function()
 		timeRecorder = Date.now();
 		level++;
 	}
-	if(level === 5)
-	{
-		whiteBall.isNormal = false;
-	}
-	if(level === 6)
-	{
-		whiteBall.isNormal = true;
-	}
 	if(level !== 1)
 	{
 		isCongratulating = true;
-		var timer = setTimeout("isCongratulating=false",1000);
+		var timer = setTimeout("isCongratulating=false",2000);
 	}
 	//过关动画,改变背景颜色
 	var tempGradient; //不同关卡使用不同渐变
@@ -427,6 +422,7 @@ smove.gameOver = function()
 	}
 	document.cookie = "best=" + escape(oldScore);
 	whiteBallPart.born();
+	setTimeout(smove.endScene,2000);
 	smove.gameOverLoop();
 }
 smove.gameOverLoop = function()
@@ -437,14 +433,47 @@ smove.gameOverLoop = function()
 		mapContext.clearRect(0,0,mapWidth,mapHeight);
 		drawMap();
 		drawScore();
-		drawTips();
 		whiteBallPart.updateWhiteBallPart();
 		whiteBallPart.drawWhiteBallPart();
 		star.rotate();
 		star.drawStar();
 		blackBalls.updateBlackBall();
 		blackBalls.drawBlackBall();
+		if(canRestart)
+		{
+			drawTips();
+			drawGameOver();
+		}
 	}
+}
+//游戏结束界面
+smove.endScene = function()
+{
+	//结束界面，七色暗彩虹,开始界面彩虹的rgb值减半
+	var tempGradient; 
+	tempGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
+	tempGradient.addColorStop(0,"rgb(50,0,0)");
+	tempGradient.addColorStop(1 / 6,"rgb(100,50,0)");
+	tempGradient.addColorStop(2 / 6,"rgb(64,64,0)");
+	tempGradient.addColorStop(3 / 6,"rgb(0,50,0)");
+	tempGradient.addColorStop(4 / 6,"rgb(0,31,64)");
+	tempGradient.addColorStop(5 / 6,"rgb(0,0,50)");
+	tempGradient.addColorStop(1,"rgb(64,0,64)");
+	let widthOnce = BGWidth / 50;
+	let counter = 0;
+	BGContext.fillStyle = tempGradient;
+	var bgChangeTimer = setInterval(function(){
+	//局部渲染
+	BGContext.clearRect(counter * widthOnce, 0, widthOnce, BGHeight);
+	BGContext.fillRect(counter * widthOnce - 10, 0, widthOnce + 10, BGHeight);
+	counter++;
+	if(counter === 50)
+	{
+		clearInterval(bgChangeTimer);
+	}
+	},30);
+	setTimeout("canRestart = true",2000);
+
 }
 //键盘输入，空格的keyCode是32，
 addEventListener("keydown", function (e) 
@@ -461,8 +490,10 @@ addEventListener("keydown", function (e)
 			isStarted = true;
 			smove.preAnimation();
 		}
-		else if(isStopped === true)
+		else if(isStopped === true && canRestart === true)
 		{
+			bgMusic.src = "sound/bg.mp3";
+			bgMusic.play();
 			smove.gameInit();
 		}
 	}
@@ -505,8 +536,10 @@ addEventListener("touchstart", function(e)
 		isStarted = true;
 		smove.preAnimation();
 	}
-	else if(isStopped === true)
+	else if(isStopped === true && canRestart === true)
 	{
+		bgMusic.src = "sound/bg.mp3";
+		bgMusic.play();
 		smove.gameInit();
 	}
 

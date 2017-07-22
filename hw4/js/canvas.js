@@ -120,7 +120,15 @@ function drawPlusOne(i)
 	mapContext.fillStyle = "blue";
 	mapContext.fillText("+1",whiteBall.x - gridSize/6,whiteBall.y);
 }
-
+//游戏结束提示
+function drawGameOver()
+{
+	let fontSize = 2 * gridSize / 3;
+	let font = fontSize + "px " + "Courier New";
+	mapContext.font = font;
+	mapContext.fillStyle = "black";
+	mapContext.fillText("Game Over!",disX / 2, mapHeight / 2);
+}
 
 //为canvas绘图引入画圆角矩形的方法
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) 
@@ -187,7 +195,7 @@ function drawTips()
 			mapContext.fillStyle = "white";
 			mapContext.fillText("按回车键开始游戏", disX + gridSize / 2, disY + disHeight + gridSize);
 		}
-		else if(isStopped === true)
+		else if(isStopped === true && canRestart === true)
 		{
 			let smallFontSize = gridSize / 5;
 			let smallFont = smallFontSize + "px " + "Courier New"
@@ -222,7 +230,7 @@ function drawTips()
 			mapContext.fillStyle = "white";
 			mapContext.fillText("点击屏幕开始游戏", disX + gridSize / 2, disY + disHeight + gridSize);
 		}
-		else if(isStopped === true)
+		else if(isStopped === true && canRestart === true)
 		{
 			let smallFontSize = gridSize / 5;
 			let smallFont = smallFontSize + "px " + "Courier New"
