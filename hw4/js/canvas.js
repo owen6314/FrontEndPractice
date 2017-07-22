@@ -13,7 +13,7 @@ function drawBackground()
 	BGGradient = BGContext.createLinearGradient(0,0,BGWidth,BGHeight);
 	BGGradient.addColorStop(0,"rgb(255,0,0)");
 	BGGradient.addColorStop(1 / 6,"rgb(255,165,0)");
-	BGGradient.addColorStop(2 / 6,"yellow");
+	BGGradient.addColorStop(2 / 6,"rgb(128,128,0)");
 	BGGradient.addColorStop(3 / 6,"green");
 	BGGradient.addColorStop(4 / 6,"rgb(0,127,255)");
 	BGGradient.addColorStop(5 / 6,"blue");

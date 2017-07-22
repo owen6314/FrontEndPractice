@@ -19,7 +19,7 @@ var level;
 //记录按键操作
 var keysDown = {};
 //音乐
-var bgMusic,getStarSound,nextLevelSound;
+var bgMusic,getStarSound,nextLevelSound,loseSound;
 //计时器,用于产生黑球
 var timeRecorder;
 var isStarted = false;
@@ -48,7 +48,6 @@ smove.prepare = function()
 	//播放与加载音乐
 	smove.loadSounds();
 	drawBackground();
-
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
@@ -85,14 +84,11 @@ smove.prepareLoop = function()
 	if(!isStarted)
 	{
 		requestAnimationFrame(smove.prepareLoop);
-		mapContext.clearRect(0,0,mapWidth,mapHeight);
-		drawMap();
+		//局部渲染
+		mapContext.clearRect(whiteBall.x - whiteBall.r - 1,whiteBall.y - whiteBall.r - 1,2 *whiteBall.r + 2,2 *whiteBall.r + 2);
 		drawScore();
-		drawTips();
 		whiteBall.preUpdateWhiteBall();
 		whiteBall.drawWhiteBall();
-		star.rotate();
-		star.drawStar();
 	}
 }
 smove.startGame = function()
@@ -198,6 +194,10 @@ smove.loadSounds = function()
 	nextLevelSound = new Audio();
 	nextLevelSound.src = 'sound/next.wav';
 	nextLevelSound.load();
+	loseSound = new Audio();
+	loseSound.src = 'sound/scream.mp3';
+	loseSound.load();
+
 }
 smove.gameLoop = function()
 {
@@ -341,8 +341,11 @@ smove.levelUp = function()
 		timeRecorder = Date.now();
 		level++;
 	}
-	isCongratulating = true;
-	var timer = setTimeout("isCongratulating=false",1000);
+	if(level !== 1)
+	{
+		isCongratulating = true;
+		var timer = setTimeout("isCongratulating=false",1000);
+	}
 
 	//过关动画,改变背景颜色
 	var tempGradient; //不同关卡使用不同渐变
@@ -399,6 +402,7 @@ smove.levelUp = function()
 smove.gameOver = function()
 {	
 	bgMusic.src = "";
+	loseSound.play();
 	isStopped = true;
 	mapContext.clearRect(0,0,mapWidth,mapHeight);
 	drawMap();
@@ -1095,25 +1099,25 @@ addEventListener("touchmove", function(e){
 			console.info("right");
 			keysDown[39] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(X) > Math.abs(Y) && X < 0) //left
 		{
 			keysDown[37] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(Y) > Math.abs(X) && Y > 0) //bottom
 		{
 			keysDown[40] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(Y) > Math.abs(X) && Y < 0) //up
 		{
 			keysDown[38] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 	}
 },false);

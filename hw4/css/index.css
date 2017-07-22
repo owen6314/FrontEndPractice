@@ -63,3 +63,11 @@ div#map
 
     margin: 0 auto;
 }
+#ball
+{
+    z-index: 3;
+
+    display: block;
+
+    margin: 0 auto;
+}
