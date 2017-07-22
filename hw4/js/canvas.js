@@ -176,6 +176,7 @@ function drawFilledStar(cxt, x, y, r, R,rot,color)
 //提示文字
 function drawTips()
 {
+	//手机端与电脑端有不同提示
 	if(isMobile === false)
 	{
 		if(isStarted === false)
@@ -211,6 +212,25 @@ function drawTips()
 			mapContext.fillText("按空格键继续游戏", disX + gridSize / 2, disY + disHeight + gridSize);
 		}
 	}
+	else
+	{
+		if(isStarted === false)
+		{
+			let smallFontSize = gridSize / 5;
+			let smallFont = smallFontSize + "px " + "Courier New"
+			mapContext.font= smallFont;
+			mapContext.fillStyle = "white";
+			mapContext.fillText("点击屏幕开始游戏", disX + gridSize / 2, disY + disHeight + gridSize);
+		}
+		else if(isStopped === true)
+		{
+			let smallFontSize = gridSize / 5;
+			let smallFont = smallFontSize + "px " + "Courier New"
+			mapContext.font= smallFont;
+			mapContext.fillStyle = "white";
+			mapContext.fillText("点击屏幕重新开始游戏", disX + gridSize / 2, disY + disHeight + gridSize);
+		}
+	}
 }
 //绘制实心圆
 function drawCircle(cxt,x, y, r,color)
@@ -225,31 +245,6 @@ function drawCircle(cxt,x, y, r,color)
     cxt.arc(circle.x, circle.y, circle.r, 0,Math.PI * 2, false);    
     cxt.fill();
 }
-/*
-//type:1左上，2左下，3右上，4右下
-function drawSector(cxt,x,y,r,color,type)
-{
-	cxt.beginPath();
-	cxt.fillStyle = color;
-	var circle = {
-		x : x,
-		y : y,
-		r : r
-	}
-	switch(type)
-	{
-		case 1:
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		case 4:
-			break;
-
-	}
-	cxt.fill();
-}*/
 //响应式更新仅在游戏时有效，其他时候无效
 function responsiveUpdate()
 {
@@ -283,5 +278,4 @@ function responsiveUpdate()
 			}
 		}
 	}
-
 }
