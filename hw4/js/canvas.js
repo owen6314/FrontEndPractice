@@ -2,8 +2,10 @@
 function drawBackground()
 {
 	//绘制背景
-	BGCanvas.width = jQuery(window).get(0).innerWidth;
-	BGCanvas.height = jQuery(window).get(0).innerHeight;
+	//BGCanvas.width = jQuery(window).get(0).innerWidth;
+	//BGCanvas.height = jQuery(window).get(0).innerHeight;
+	BGCanvas.width = window.innerWidth;
+	BGCanvas.height = window.innerHeight;
 	BGWidth = BGCanvas.width;
 	BGHeight = BGCanvas.height;
 	/*
@@ -27,8 +29,10 @@ function drawBackground()
 function drawMap()
 {
 	//根据屏幕大小调整
-	mapWidth = jQuery(window).get(0).innerWidth;
-	mapHeight = jQuery(window).get(0).innerHeight;
+	//mapWidth = jQuery(window).get(0).innerWidth;
+	//mapHeight = jQuery(window).get(0).innerHeight;
+	mapWidth = window.innerWidth;
+	mapHeight = window.innerHeight;
 	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
 	mapHeight = mapWidth;
 	mapCanvas.width = mapWidth;

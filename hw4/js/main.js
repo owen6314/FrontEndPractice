@@ -51,8 +51,11 @@ smove.prepare = function()
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
-	mapWidth = jQuery(window).get(0).innerWidth;
-	mapHeight = jQuery(window).get(0).innerHeight;
+	//mapWidth = jQuery(window).get(0).innerWidth;
+	mapWidth = window.innerWidth;
+	console.info(mapWidth);
+	//mapHeight = jQuery(window).get(0).innerHeight;
+	mapHeight = window.innerHeight;
 	mapWidth = mapWidth > mapHeight ? mapHeight : mapWidth;
 	mapHeight = mapWidth;
 	oldmapWidth = mapWidth;
@@ -336,7 +339,7 @@ smove.isCaught = function()
 }
 smove.levelUp = function()
 {
-	if(level <= 6)
+	if(level <= 5)
 	{
 		timeRecorder = Date.now();
 		level++;
