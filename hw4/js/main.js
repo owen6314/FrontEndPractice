@@ -47,7 +47,6 @@ smove.prepare = function()
 	//播放与加载音乐
 	smove.loadSounds();
 	drawBackground();
-
 	mapCanvas = document.getElementById("inner");
 	mapContext = mapCanvas.getContext("2d");
 	//mapWidth和mapHeight是内部正方形画布的大小，所有的游戏内容都在这里
@@ -84,14 +83,11 @@ smove.prepareLoop = function()
 	if(!isStarted)
 	{
 		requestAnimationFrame(smove.prepareLoop);
-		mapContext.clearRect(0,0,mapWidth,mapHeight);
-		drawMap();
+		//局部渲染
+		mapContext.clearRect(whiteBall.x - whiteBall.r - 1,whiteBall.y - whiteBall.r - 1,2 *whiteBall.r + 2,2 *whiteBall.r + 2);
 		drawScore();
-		drawTips();
 		whiteBall.preUpdateWhiteBall();
 		whiteBall.drawWhiteBall();
-		star.rotate();
-		star.drawStar();
 	}
 }
 smove.startGame = function()
@@ -344,8 +340,11 @@ smove.levelUp = function()
 		timeRecorder = Date.now();
 		level++;
 	}
-	isCongratulating = true;
-	var timer = setTimeout("isCongratulating=false",1000);
+	if(level !== 1)
+	{
+		isCongratulating = true;
+		var timer = setTimeout("isCongratulating=false",1000);
+	}
 
 	//过关动画,改变背景颜色
 	var tempGradient; //不同关卡使用不同渐变
