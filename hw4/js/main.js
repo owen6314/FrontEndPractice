@@ -37,6 +37,7 @@ var isMobile;
 var touchStartX, touchStartY;
 //移动端防止touchmove多次
 var ableToMove;
+
 window.smove = {};
 
 smove.prepare = function()
@@ -1116,6 +1117,7 @@ addEventListener("touchmove", function(e){
 		}
 	}
 },false);
+
 //判断是否为移动端，代码参考https://github.com/5Mi/wumi_blog/issues/48
 var browser={  
     versions:function(){   
@@ -1140,13 +1142,11 @@ if(browser.versions.mobile || browser.versions.ios || browser.versions.android |
     browser.versions.iPhone || browser.versions.iPad)	//移动端
 {
 	isMobile = true;
-	//console.log('mobile');
 	ableToMove = true;
 	smove.prepare();
 }
 else
 {
   	isMobile = false;
-  	//console.log('pc');
 	smove.prepare();
 }
