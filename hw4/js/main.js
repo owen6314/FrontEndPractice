@@ -19,7 +19,7 @@ var level;
 //记录按键操作
 var keysDown = {};
 //音乐
-var bgMusic,getStarSound,nextLevelSound;
+var bgMusic,getStarSound,nextLevelSound,loseSound;
 //计时器,用于产生黑球
 var timeRecorder;
 var isStarted = false;
@@ -197,6 +197,10 @@ smove.loadSounds = function()
 	nextLevelSound = new Audio();
 	nextLevelSound.src = 'sound/next.wav';
 	nextLevelSound.load();
+	loseSound = new Audio();
+	loseSound.src = 'sound/scream.mp3';
+	loseSound.load();
+
 }
 smove.gameLoop = function()
 {
@@ -398,6 +402,7 @@ smove.levelUp = function()
 smove.gameOver = function()
 {	
 	bgMusic.src = "";
+	loseSound.play();
 	isStopped = true;
 	mapContext.clearRect(0,0,mapWidth,mapHeight);
 	drawMap();
@@ -1094,25 +1099,25 @@ addEventListener("touchmove", function(e){
 			console.info("right");
 			keysDown[39] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(X) > Math.abs(Y) && X < 0) //left
 		{
 			keysDown[37] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(Y) > Math.abs(X) && Y > 0) //bottom
 		{
 			keysDown[40] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 		else if(Math.abs(Y) > Math.abs(X) && Y < 0) //up
 		{
 			keysDown[38] = true;
 			ableToMove = false;
-			setTimeout(function(){ableToMove = true;},150);
+			setTimeout(function(){ableToMove = true;},200);
 		}
 	}
 },false);
