@@ -60,9 +60,10 @@ function isIPv4(s)
     }
     var b;
     //有字母
+    //特殊情况：isNaN(" ")返回false，所以要单独检验是否为空格
     for(b in list[a])
     {
-      if(isNaN(list[a][b]))
+      if(isNaN(list[a][b]) || list[a][b] === " ")
       {
         return false;
       }
